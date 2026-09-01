@@ -1,4 +1,4 @@
-@ArticleDatabase_HostAddress = http://localhost:5167
+@ArticleDatabase_HostAddress = http://localhost:5070
 
 GET {{ArticleDatabase_HostAddress}}/weatherforecast/
 Accept: application/json

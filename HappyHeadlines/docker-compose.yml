@@ -101,7 +101,7 @@
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: comments
+      POSTGRES_DB: comment
     ports:
       - "5440:5432"
     volumes:

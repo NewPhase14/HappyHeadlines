@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleService", "ArticleSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleDatabase", "ArticleDatabase\ArticleDatabase.csproj", "{7C6B7E06-54DD-402F-A389-6590F6242C8A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreDomain", "CoreDomain\CoreDomain.csproj", "{3AC92733-3AAB-451D-AAB1-05CE68C08105}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{7C6B7E06-54DD-402F-A389-6590F6242C8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C6B7E06-54DD-402F-A389-6590F6242C8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C6B7E06-54DD-402F-A389-6590F6242C8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AC92733-3AAB-451D-AAB1-05CE68C08105}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AC92733-3AAB-451D-AAB1-05CE68C08105}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AC92733-3AAB-451D-AAB1-05CE68C08105}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AC92733-3AAB-451D-AAB1-05CE68C08105}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

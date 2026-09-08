@@ -1,4 +1,4 @@
-namespace ArticleService;
+﻿namespace CoreDomain;
 
 public class Article
 {
@@ -7,7 +7,6 @@ public class Article
     public string Title { get; set; }
     
     public string Content { get; set; }
-    
+
     public string Continent { get; set; }
-    
 }

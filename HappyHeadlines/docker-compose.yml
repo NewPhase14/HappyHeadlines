@@ -59,17 +59,17 @@
     volumes:
       - south-america-db-data:/var/lib/postgresql
     
-  antactica-db:
+  antarctica-db:
     image: postgres:latest
-    container_name: antactica-db
+    container_name: antarctica-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: antactica
+      POSTGRES_DB: antarctica
     ports:
       - "5437:5432"
     volumes:
-      - antactica-db-data:/var/lib/postgresql
+      - antarctica-db-data:/var/lib/postgresql
     
   oceania-db:
     image: postgres:latest
@@ -105,7 +105,7 @@
       - asia-db
       - north-america-db
       - south-america-db
-      - antactica-db
+      - antarctica-db
       - oceania-db
       - global-db
   
@@ -124,7 +124,7 @@ volumes:
     asia-db-data:
     north-america-db-data:
     south-america-db-data:
-    antactica-db-data:
+    antarctica-db-data:
     oceania-db-data:
     global-db-data:
     

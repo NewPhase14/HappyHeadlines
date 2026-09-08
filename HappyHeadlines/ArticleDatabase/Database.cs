@@ -1,5 +1,5 @@
 using System.Data.Common;
-using Microsoft.Data.SqlClient;
+using CoreDomain;
 
 namespace ArticleDatabase;
 
@@ -15,35 +15,31 @@ public class Database
 
     public void DeleteDatabase()
     {
-        Execute(coordinator.GetAfricaConnection(), "DROP TABLE IF EXISTS AfricaDB");
-        Execute(coordinator.GetAntarcticaConnection(), "DROP TABLE IF EXISTS AntarcticaDB");
-        Execute(coordinator.GetAsiaConnection(), "DROP TABLE IF EXISTS AsiaDB");
-        Execute(coordinator.GetEuropeConnection(), "DROP TABLE IF EXISTS EuropeDB");
-        Execute(coordinator.GetNorthAmericaConnection(), "DROP TABLE IF EXISTS NorthAmericaDB");
-        Execute(coordinator.GetSouthAmericaConnection(), "DROP TABLE IF EXISTS SouthAmericaDB");
-        Execute(coordinator.GetOceaniaConnection(), "DROP TABLE IF EXISTS OceaniaDB");
-        Execute(coordinator.GetGlobalConnection(), "DROP TABLE IF EXISTS GlobalDB");
+        var connections = coordinator.GetAllConnections();
+        
+        foreach (var connection in connections)
+        {
+            Execute(connection, $"DROP TABLE IF EXISTS Article");
+        }
     }
     
     public void RecreateDatabase()
     {
-        Execute(coordinator.GetAfricaConnection(), "CREATE TABLE AfricaDB(id varchar PRIMARY KEY, title VARCHAR(100), content VARCHAR(max), continent VARCHAR(50))");
-        Execute(coordinator.GetAntarcticaConnection(), "CREATE TABLE AntarcticaDB(id varchar PRIMARY KEY, title VARCHAR(100), content VARCHAR(max), continent VARCHAR(50))");
-        Execute(coordinator.GetAsiaConnection(), "CREATE TABLE AsiaDB(id varchar PRIMARY KEY, title VARCHAR(100), content VARCHAR(max), continent VARCHAR(50))");
-        Execute(coordinator.GetEuropeConnection(), "CREATE TABLE EuropeDB(id varchar PRIMARY KEY, title VARCHAR(100), content VARCHAR(max), continent VARCHAR(50))");
-        Execute(coordinator.GetNorthAmericaConnection(), "CREATE TABLE NorthAmericaDB(id varchar PRIMARY KEY, title VARCHAR(100), content VARCHAR(max), continent VARCHAR(50))");
-        Execute(coordinator.GetSouthAmericaConnection(), "CREATE TABLE SouthAmericaDB(id varchar PRIMARY KEY, title VARCHAR(100), content VARCHAR(max), continent VARCHAR(50))");
-        Execute(coordinator.GetOceaniaConnection(), "CREATE TABLE OceaniaDB(id varchar PRIMARY KEY, title VARCHAR(100), content VARCHAR(max), continent VARCHAR(50))");
-        Execute(coordinator.GetGlobalConnection(), "CREATE TABLE GlobalDB(id varchar PRIMARY KEY, title VARCHAR(100), content VARCHAR(max), continent VARCHAR(50))");
+        var connections = coordinator.GetAllConnections();
+
+        foreach (var connection in connections)
+        { 
+            Execute(connection, $"CREATE TABLE Article(id VARCHAR PRIMARY KEY, title VARCHAR(100), content VARCHAR(1000), continent VARCHAR(50))");
+        }
     }
     
     //Get all articles from a specific continent database
     
     //Insert an article into a specific continent database
-    public void InsertArticle(string continent, string id, string title, string content)
+    public void InsertArticle(Article article)
     {
-        var connection = coordinator.GetConnectionByServerName(continent);
-        Execute(connection, $"INSERT INTO {continent}DB(id, title, content, continent) VALUES('{id}', '{title}', '{content}', '{continent}')");
+        var connection = coordinator.GetConnectionByServerName(article.Continent);
+        Execute(connection, $"INSERT INTO Article(id, title, content, continent) VALUES('{article.Id}', '{article.Title}', '{article.Content}', '{article.Continent}')");
     }
 
     private void Execute(DbConnection connection, string sql)

@@ -1,3 +1,5 @@
+using ArticleDatabase;
+using CoreDomain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ArticleService.Controllers;
@@ -6,11 +8,13 @@ namespace ArticleService.Controllers;
 [Route("[controller]")]
 public class ArticleController : ControllerBase
 {
+    private Database database = Database.GetInstance();
+    
     [HttpPost(Name = "CreateArticle")]
     public IActionResult CreateArticle([FromBody] Article article)
     {
-        // TODO: Implement the logic to create a new article
-        throw new NotImplementedException();
+        database.InsertArticle(article);
+        return Ok();
     }
 
     [HttpGet(Name = "GetArticles")]

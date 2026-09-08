@@ -1,3 +1,130 @@
 ﻿services:
+  africa-db:
+    image: postgres:latest
+    container_name: africa-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: africa
+    ports:
+      - "5432:5432"
+    volumes:
+      - africa-db-data:/var/lib/postgresql
+    
+  europe-db:
+    image: postgres:latest
+    container_name: europe-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: europe
+    ports:
+      - "5433:5432"
+    volumes:
+      - europe-db-data:/var/lib/postgresql
   
+  asia-db:
+    image: postgres:latest
+    container_name: asia-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: asia
+    ports:
+      - "5434:5432"
+    volumes:
+      - asia-db-data:/var/lib/postgresql
+  
+  north-america-db:
+    image: postgres:latest
+    container_name: north-america-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: north_america
+    ports:
+      - "5435:5432"
+    volumes:
+      - north-america-db-data:/var/lib/postgresql
+    
+  south-america-db:
+    image: postgres:latest
+    container_name: south-america-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: south_america
+    ports:
+      - "5436:5432"
+    volumes:
+      - south-america-db-data:/var/lib/postgresql
+    
+  antactica-db:
+    image: postgres:latest
+    container_name: antactica-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: antactica
+    ports:
+      - "5437:5432"
+    volumes:
+      - antactica-db-data:/var/lib/postgresql
+    
+  oceania-db:
+    image: postgres:latest
+    container_name: oceania-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: oceania
+    ports:
+      - "5438:5432"
+    volumes:
+      - oceania-db-data:/var/lib/postgresql
 
+  global-db:
+    image: postgres:latest
+    container_name: global-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: global
+    ports:
+      - "5439:5432"
+    volumes:
+      - global-db-data:/var/lib/postgresql
+
+  article-database:
+    build:
+      context: .
+      dockerfile: ArticleDatabase/Dockerfile
+    depends_on:
+      - africa-db
+      - europe-db
+      - asia-db
+      - north-america-db
+      - south-america-db
+      - antactica-db
+      - oceania-db
+      - global-db
+  
+  article-service:
+    build:
+      context: .
+      dockerfile: ArticleService/Dockerfile
+    depends_on:
+      - article-database
+    deploy:
+      replicas: 3
+
+volumes:
+    africa-db-data:
+    europe-db-data:
+    asia-db-data:
+    north-america-db-data:
+    south-america-db-data:
+    antactica-db-data:
+    oceania-db-data:
+    global-db-data:
+    

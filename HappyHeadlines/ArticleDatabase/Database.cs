@@ -33,13 +33,56 @@ public class Database
         }
     }
     
-    //Get all articles from a specific continent database
     
     //Insert an article into a specific continent database
     public void InsertArticle(Article article)
     {
         var connection = coordinator.GetConnectionByServerName(article.Continent);
         Execute(connection, $"INSERT INTO Article(id, title, content, continent) VALUES('{article.Id}', '{article.Title}', '{article.Content}', '{article.Continent}')");
+    }
+    
+    //Get all article
+    public List<Article> GetAllArticles()
+    {
+        var articles = new List<Article>();
+        var connections = coordinator.GetAllConnections();
+        foreach (var connection in connections)
+        {
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = $"SELECT * FROM Article";
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                articles.Add(new Article
+                {
+                    Id = reader.GetString(0),
+                    Title = reader.GetString(1),
+                    Content = reader.GetString(2),
+                    Continent = reader.GetString(3)
+                });
+            }
+        }
+        return articles;
+    }
+    
+    //Delete an article by its ID
+    public void DeleteArticle(string id)
+    {
+        var connections = coordinator.GetAllConnections();
+        foreach (var connection in connections)
+        {
+            Execute(connection, $"DELETE FROM Article WHERE id = '{id}'");
+        }
+    }
+    
+    //Update an article by its ID
+    public void UpdateArticle(string id, Article article)
+    {
+        var connections = coordinator.GetAllConnections();
+        foreach (var connection in connections)
+        {
+            Execute(connection, $"UPDATE Article SET title = '{article.Title}', content = '{article.Content}', continent = '{article.Continent}' WHERE id = '{id}'");
+        }
     }
 
     private void Execute(DbConnection connection, string sql)

@@ -20,21 +20,20 @@ public class ArticleController : ControllerBase
     [HttpGet(Name = "GetArticles")]
     public ActionResult<List<Article>>GetArticles()
     {
-        // TODO: Implement the logic to retrieve a list of articles
-        throw new NotImplementedException();
+        return Ok(database.GetAllArticles());
     }
 
     [HttpDelete("{id}", Name = "DeleteArticle")]
-    public IActionResult DeleteArticle(int id)
+    public IActionResult DeleteArticle(string id)
     {
-        // TODO: Implement the logic to delete an article by its ID
-        throw new NotImplementedException();
+        database.DeleteArticle(id);
+        return Ok("Article deleted successfully");
     }
 
     [HttpPut("{id}", Name = "UpdateArticle")]
-    public IActionResult UpdateArticle(int id, [FromBody] Article article)
+    public IActionResult UpdateArticle(string id, [FromBody] Article article)
     {
-        // TODO: Implement the logic to update an article by its ID
-        throw new NotImplementedException();
+        database.UpdateArticle(id, article);
+        return Ok("Article updated successfully");
     }
 }

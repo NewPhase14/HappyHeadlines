@@ -6,5 +6,13 @@ namespace ProfanityService.Controllers;
 [Route("[controller]")]
 public class ProfanityServiceController : ControllerBase
 {
-    
+    private readonly ProfanityService profanityService = new ProfanityService();
+
+    [HttpPost("checkProfanity")]
+    public ActionResult<bool> CheckProfanity([FromBody] string message)
+    {
+        bool containsProfanity = profanityService.ContainsProfanity(message);
+
+        return Ok(containsProfanity);
+    }
 }

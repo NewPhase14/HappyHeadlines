@@ -20,6 +20,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\CommentDatabase\CommentDatabase.csproj" />
+      <ProjectReference Include="..\ProfanityService\ProfanityService.csproj" />
     </ItemGroup>
 
 </Project>

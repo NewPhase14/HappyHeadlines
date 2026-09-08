@@ -94,6 +94,30 @@
       - "5439:5432"
     volumes:
       - global-db-data:/var/lib/postgresql
+    
+  comment-db:
+    image: postgres:latest
+    container_name: comment-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: comments
+    ports:
+      - "5440:5432"
+    volumes:
+      - comment-db-data:/var/lib/postgresql
+    
+  profanity-db:
+    image: postgres:latest
+    container_name: profanity-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: profanity
+    ports:
+      - "5441:5432"
+    volumes:
+      - profanity-db-data:/var/lib/postgresql
 
   article-database:
     build:
@@ -117,7 +141,36 @@
       - article-database
     deploy:
       replicas: 3
+     
+  profanity-database:
+    build:
+      context: .
+      dockerfile: ProfanityDatabase/Dockerfile
+    depends_on:
+      - profanity-db
 
+  profanity-service:
+    build:
+      context: .
+      dockerfile: ProfanityService/Dockerfile
+    depends_on:
+      - profanity-database 
+     
+  comment-database: 
+    build:
+      context: .
+      dockerfile: CommentDatabase/Dockerfile
+    depends_on:
+      - comment-db
+    
+  comment-service:
+    build:
+      context: .
+      dockerfile: CommentService/Dockerfile
+    depends_on:
+      - comment-database
+      - profanity-service
+  
 volumes:
     africa-db-data:
     europe-db-data:
@@ -127,4 +180,6 @@ volumes:
     antarctica-db-data:
     oceania-db-data:
     global-db-data:
+    comment-db-data:
+    profanity-db-data:
     

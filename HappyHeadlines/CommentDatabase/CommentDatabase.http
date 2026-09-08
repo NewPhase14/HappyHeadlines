@@ -1,0 +1,6 @@
+@CommentDatabase_HostAddress = http://localhost:5116
+
+GET {{CommentDatabase_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

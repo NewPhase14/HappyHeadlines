@@ -50,7 +50,8 @@ public class Coordinator
             "Africa" => AFRICA_DB,
             "Oceania" => OCEANIA_DB,
             "Antarctica" => ANTARCTICA_DB,
-            _ => GLOBAL_DB
+            "Global" => GLOBAL_DB,
+            _ => throw new ArgumentException($"Invalid server name: {serverName}")
         };
         
         if (ConnectionCache.TryGetValue(serverName, out var connection))

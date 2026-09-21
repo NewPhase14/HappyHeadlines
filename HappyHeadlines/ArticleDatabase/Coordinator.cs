@@ -10,29 +10,27 @@ public class Coordinator
     private IDictionary<string, DbConnection> ConnectionCache = new Dictionary<string, DbConnection>();
     
     // Database for each continent + global database
-    private DatabaseStruct ASIA_DB = new DatabaseStruct { name = "asia", port = "5434" };
-    private DatabaseStruct EUROPE_DB = new DatabaseStruct { name = "europe", port = "5433" };
-    private DatabaseStruct NORTH_AMERICA_DB = new DatabaseStruct { name = "north_america", port = "5435" };
-    private DatabaseStruct SOUTH_AMERICA_DB = new DatabaseStruct { name = "south_america", port = "5436" };
-    private DatabaseStruct AFRICA_DB = new DatabaseStruct { name = "africa", port = "5432" };
-    private DatabaseStruct OCEANIA_DB = new DatabaseStruct { name = "oceania", port = "5438" };
-    private DatabaseStruct ANTARCTICA_DB = new DatabaseStruct { name = "antarctica", port = "5437" };
-    private DatabaseStruct GLOBAL_DB = new DatabaseStruct { name = "global", port = "5439" };
-
-    
+    private DatabaseStruct ASIA_DB = new DatabaseStruct { name = "ASIA"};
+    private DatabaseStruct EUROPE_DB = new DatabaseStruct { name = "EUROPE" };
+    private DatabaseStruct NORTH_AMERICA_DB = new DatabaseStruct { name = "NORTH_AMERICA" };
+    private DatabaseStruct SOUTH_AMERICA_DB = new DatabaseStruct { name = "SOUTH_AMERICA" };
+    private DatabaseStruct AFRICA_DB = new DatabaseStruct { name = "AFRICA"};
+    private DatabaseStruct OCEANIA_DB = new DatabaseStruct { name = "OCEANIA" };
+    private DatabaseStruct ANTARCTICA_DB = new DatabaseStruct { name = "ANTARCTICA" };
+    private DatabaseStruct GLOBAL_DB = new DatabaseStruct { name = "GLOBAL"};
     
     public List<DbConnection> GetAllConnections()
     {
         List<DbConnection> connections = new List<DbConnection>();
 
-        connections.Add(new NpgsqlConnection($"Server=localhost;Port={ASIA_DB.port};Database={ASIA_DB.name};User Id=admin;Password=admin;"));
-        connections.Add(new NpgsqlConnection($"Server=localhost;Port={EUROPE_DB.port};Database={EUROPE_DB.name};User Id=admin;Password=admin;"));
-        connections.Add(new NpgsqlConnection($"Server=localhost;Port={NORTH_AMERICA_DB.port};Database={NORTH_AMERICA_DB.name};User Id=admin;Password=admin;"));
-        connections.Add(new NpgsqlConnection($"Server=localhost;Port={SOUTH_AMERICA_DB.port};Database={SOUTH_AMERICA_DB.name};User Id=admin;Password=admin;"));
-        connections.Add(new NpgsqlConnection($"Server=localhost;Port={AFRICA_DB.port};Database={AFRICA_DB.name};User Id=admin;Password=admin;"));
-        connections.Add(new NpgsqlConnection($"Server=localhost;Port={OCEANIA_DB.port};Database={OCEANIA_DB.name};User Id=admin;Password=admin;"));
-        connections.Add(new NpgsqlConnection($"Server=localhost;Port={ANTARCTICA_DB.port};Database={ANTARCTICA_DB.name};User Id=admin;Password=admin;"));
-        connections.Add(new NpgsqlConnection($"Server=localhost;Port={GLOBAL_DB.port};Database={GLOBAL_DB.name};User Id=admin;Password=admin;"));
+        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("ASIA_DB_CONNECTION")));
+        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("EUROPE_DB_CONNECTION")));
+        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("NORTH_AMERICA_DB_CONNECTION")));
+        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("SOUTH_AMERICA_DB_CONNECTION")));
+        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("AFRICA_DB_CONNECTION")));
+        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("OCEANIA_DB_CONNECTION")));
+        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("ANTARCTICA_DB_CONNECTION")));
+        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("GLOBAL_DB_CONNECTION")));
 
         foreach (var connection in connections)
         {
@@ -60,9 +58,9 @@ public class Coordinator
             return connection;
         }
         
-        connection = new NpgsqlConnection($"Server=localhost;Port={databaseStruct.port};Database={databaseStruct.name};User Id=admin;Password=admin;");
+        connection = new NpgsqlConnection(Environment.GetEnvironmentVariable($"{databaseStruct.name}_DB_CONNECTION"));
         connection.Open();
-        ConnectionCache.Add(databaseStruct.name, connection);
+        ConnectionCache.Add(serverName, connection);
         return connection;
     }
 }

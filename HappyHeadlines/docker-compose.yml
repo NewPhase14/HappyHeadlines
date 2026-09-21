@@ -1,7 +1,6 @@
 ﻿services:
   africa-db:
     image: postgres:latest
-    container_name: africa-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -13,7 +12,6 @@
     
   europe-db:
     image: postgres:latest
-    container_name: europe-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -25,7 +23,6 @@
   
   asia-db:
     image: postgres:latest
-    container_name: asia-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -37,7 +34,6 @@
   
   north-america-db:
     image: postgres:latest
-    container_name: north-america-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -49,7 +45,6 @@
     
   south-america-db:
     image: postgres:latest
-    container_name: south-america-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -61,7 +56,6 @@
     
   antarctica-db:
     image: postgres:latest
-    container_name: antarctica-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -73,7 +67,6 @@
     
   oceania-db:
     image: postgres:latest
-    container_name: oceania-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -85,7 +78,6 @@
 
   global-db:
     image: postgres:latest
-    container_name: global-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -97,7 +89,6 @@
     
   comment-db:
     image: postgres:latest
-    container_name: comment-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -109,7 +100,6 @@
     
   profanity-db:
     image: postgres:latest
-    container_name: profanity-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -120,6 +110,7 @@
       - profanity-db-data:/var/lib/postgresql
 
   article-database:
+    image: article-database:latest
     build:
       context: .
       dockerfile: ArticleDatabase/Dockerfile
@@ -134,15 +125,29 @@
       - global-db
   
   article-service:
+    image: article-service:latest
     build:
       context: .
       dockerfile: ArticleService/Dockerfile
     depends_on:
       - article-database
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      AFRICA_DB_CONNECTION: "Host=africa-db;Port=5432;Database=africa;Username=admin;Password=admin"
+      EUROPE_DB_CONNECTION: "Host=europe-db;Port=5432;Database=europe;Username=admin;Password=admin"
+      ASIA_DB_CONNECTION: "Host=asia-db;Port=5432;Database=asia;Username=admin;Password=admin"
+      NORTH_AMERICA_DB_CONNECTION: "Host=north-america-db;Port=5432;Database=north_america;Username=admin;Password=admin"
+      SOUTH_AMERICA_DB_CONNECTION: "Host=south-america-db;Port=5432;Database=south_america;Username=admin;Password=admin"
+      ANTARCTICA_DB_CONNECTION: "Host=antarctica-db;Port=5432;Database=antarctica;Username=admin;Password=admin"
+      OCEANIA_DB_CONNECTION: "Host=oceania-db;Port=5432;Database=oceania;Username=admin;Password=admin"
+      GLOBAL_DB_CONNECTION: "Host=global-db;Port=5432;Database=global;Username=admin;Password=admin"
     deploy:
       replicas: 3
+    ports:
+      - "5001:8080"
      
   profanity-database:
+    image: profanity-database:latest
     build:
       context: .
       dockerfile: ProfanityDatabase/Dockerfile
@@ -150,13 +155,19 @@
       - profanity-db
 
   profanity-service:
+    image: profanity-service:latest
     build:
       context: .
       dockerfile: ProfanityService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
     depends_on:
       - profanity-database 
+    ports:
+      - "5002:8080"
      
   comment-database: 
+    image: comment-database:latest
     build:
       context: .
       dockerfile: CommentDatabase/Dockerfile
@@ -164,12 +175,17 @@
       - comment-db
     
   comment-service:
+    image: comment-service:latest
     build:
       context: .
       dockerfile: CommentService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
     depends_on:
       - comment-database
       - profanity-service
+    ports:
+      - "5003:8080"
   
 volumes:
     africa-db-data:

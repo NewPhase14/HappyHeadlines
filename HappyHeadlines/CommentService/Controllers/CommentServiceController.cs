@@ -10,7 +10,7 @@ public class CommentServiceController : ControllerBase
 {
     private Database database = Database.GetInstance();
     
-    [HttpPost(Name = "CreateArticle")]
+    [HttpPost(Name = "CreateComment")]
     public IActionResult CreateComment([FromBody] Comment comment)
     {
         database.InsertComment(comment);

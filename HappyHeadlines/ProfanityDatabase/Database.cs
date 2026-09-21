@@ -16,7 +16,7 @@ public class Database
 
     public Database()
     {
-        connection = new NpgsqlConnection($"Server=localhost;Port=5441;Database=profanity;User Id=admin;Password=admin;"); 
+        connection = new NpgsqlConnection(Environment.GetEnvironmentVariable("PROFANITY_DB_CONNECTION")); 
         connection.Open();
     }
 

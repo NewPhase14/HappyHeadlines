@@ -161,6 +161,7 @@
       dockerfile: ProfanityService/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      PROFANITY_DB_CONNECTION: "Host=profanity-db;Port=5432;Database=profanity;Username=admin;Password=admin"
     depends_on:
       - profanity-database 
     ports:
@@ -181,6 +182,7 @@
       dockerfile: CommentService/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      COMMENT_DB_CONNECTION: "Host=comment-db;Port=5432;Database=comment;Username=admin;Password=admin"
     depends_on:
       - comment-database
       - profanity-service

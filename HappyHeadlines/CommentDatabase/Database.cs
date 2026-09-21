@@ -13,7 +13,7 @@ public class Database
     
     public Database()
     {
-        connection = new NpgsqlConnection($"Server=localhost;Port=5440;Database=comments;User Id=admin;Password=admin;"); 
+        connection = new NpgsqlConnection(Environment.GetEnvironmentVariable("COMMENT_DB_CONNECTION")); 
         connection.Open();
     }
 

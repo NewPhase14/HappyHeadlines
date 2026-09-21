@@ -1,16 +1,20 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient(
+    "ProfanityService",
+    client =>
+    {
+        client.BaseAddress =
+            new Uri("http://profanity-service:8080/");
 
+        client.Timeout = TimeSpan.FromSeconds(2);
+    });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

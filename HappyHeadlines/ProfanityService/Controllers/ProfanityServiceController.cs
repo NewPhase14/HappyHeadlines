@@ -11,7 +11,7 @@ public class ProfanityServiceController : ControllerBase
     [HttpPost("checkProfanity")]
     public ActionResult<bool> CheckProfanity([FromBody] string message)
     {
-        bool containsProfanity = profanityService.ContainsProfanity(message);
+        var containsProfanity = profanityService.ContainsProfanity(message);
 
         return Ok(containsProfanity);
     }

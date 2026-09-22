@@ -1,6 +1,8 @@
 using ArticleDatabase;
 using CoreDomain;
 using Microsoft.AspNetCore.Mvc;
+using Monitoring;
+using Serilog;
 
 namespace ArticleService.Controllers;
 
@@ -20,6 +22,12 @@ public class ArticleController : ControllerBase
     [HttpGet(Name = "GetArticles")]
     public ActionResult<List<Article>>GetArticles()
     {
+        using var activity = MonitoringService.ActivitySource.StartActivity();
+        
+        Console.WriteLine($"Activity is null: {activity is null}");
+        
+        MonitoringService.log.Information("GetArticles endpoint called - v1");
+
         return Ok(database.GetAllArticles());
     }
 

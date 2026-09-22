@@ -21,6 +21,7 @@
     <ItemGroup>
       <ProjectReference Include="..\ArticleDatabase\ArticleDatabase.csproj" />
       <ProjectReference Include="..\CoreDomain\CoreDomain.csproj" />
+      <ProjectReference Include="..\Monitoring\Monitoring.csproj" />
     </ItemGroup>
 
 </Project>

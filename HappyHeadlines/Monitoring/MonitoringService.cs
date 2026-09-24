@@ -24,8 +24,13 @@ public static class MonitoringService
                 ResourceBuilder.CreateDefault()
                     .AddService(ServiceName))
             .AddSource(ServiceName)
+            // Force all activities to be sampled
+            .SetSampler(new AlwaysOnSampler())
             .AddConsoleExporter()
-            .AddZipkinExporter()
+            .AddZipkinExporter(config =>
+            {
+                config.Endpoint = new Uri("http://zipkin:9411/api/v2/spans");
+            })
             .Build();
 
         //Serilog

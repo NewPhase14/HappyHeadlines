@@ -73,9 +73,8 @@ public class ArticleController(IHttpClientFactory httpClientFactory) : Controlle
     [HttpGet(Name = "GetArticles")]
     public ActionResult<List<Article>>GetArticles()
     {
-        using var activity = MonitoringService.ActivitySource.StartActivity();
-        
-        Console.WriteLine($"Activity is null: {activity is null}");
+        using var activity =
+            MonitoringService.ActivitySource.StartActivity();
         
         return Ok(database.GetAllArticles());
     }

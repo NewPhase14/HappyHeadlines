@@ -9,4 +9,6 @@ public class Article
     public string Content { get; set; }
 
     public string Continent { get; set; }
+    
+    public bool Draft { get; set; }
 }

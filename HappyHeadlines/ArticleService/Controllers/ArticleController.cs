@@ -8,15 +8,66 @@ namespace ArticleService.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ArticleController : ControllerBase
+public class ArticleController(IHttpClientFactory httpClientFactory) : ControllerBase
 {
     private Database database = Database.GetInstance();
+    private readonly HttpClient draftClient = httpClientFactory.CreateClient("DraftService");
+
     
     [HttpPost(Name = "CreateArticle")]
-    public IActionResult CreateArticle([FromBody] Article article)
+    public async Task<IActionResult> CreateArticle([FromBody] Article article)
     {
-        database.InsertArticle(article);
-        return Ok();
+        // Only contact DraftService if this is a draft
+        if (article.Draft)
+        {
+            try
+            {
+                var response = await draftClient.PostAsJsonAsync(
+                    "DraftService/createDraft",
+                    article);
+                
+                Console.WriteLine(
+                    $"DraftService response: {(int)response.StatusCode} " +
+                    $"{response.StatusCode}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return StatusCode(
+                        StatusCodes.Status503ServiceUnavailable,
+                        "Draft service is unavailable.");
+                }
+                
+                // Draft was saved by DraftService.
+                // Do NOT save it in ArticleDatabase.
+                return Ok("Draft created successfully.");
+                
+            }
+            catch (HttpRequestException)
+            {
+                return StatusCode(
+                    StatusCodes.Status503ServiceUnavailable,
+                    "Draft service is unavailable.");
+            }
+            catch (TaskCanceledException)
+            {
+                return StatusCode(
+                    StatusCodes.Status503ServiceUnavailable,
+                    "Draft service timed out.");
+            }
+        }
+
+        try
+        {
+            database.InsertArticle(article);
+            return Ok();
+        }
+        catch
+        {
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                "Article database is unavailable.");
+        }
+        
     }
 
     [HttpGet(Name = "GetArticles")]
@@ -26,8 +77,6 @@ public class ArticleController : ControllerBase
         
         Console.WriteLine($"Activity is null: {activity is null}");
         
-        MonitoringService.log.Information("GetArticles endpoint called - v1");
-
         return Ok(database.GetAllArticles());
     }
 

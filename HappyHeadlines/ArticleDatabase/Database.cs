@@ -29,7 +29,7 @@ public class Database
 
         foreach (var connection in connections)
         { 
-            Execute(connection, $"CREATE TABLE Article(id VARCHAR PRIMARY KEY, title VARCHAR(100), content VARCHAR(1000), continent VARCHAR(50))");
+            Execute(connection, $"CREATE TABLE Article(id VARCHAR PRIMARY KEY, title VARCHAR(100), content VARCHAR(1000), continent VARCHAR(50), draft BOOLEAN)");
         }
     }
     
@@ -38,7 +38,7 @@ public class Database
     public void InsertArticle(Article article)
     {
         var connection = coordinator.GetConnectionByServerName(article.Continent);
-        Execute(connection, $"INSERT INTO Article(id, title, content, continent) VALUES('{article.Id}', '{article.Title}', '{article.Content}', '{article.Continent}')");
+        Execute(connection, $"INSERT INTO Article(id, title, content, continent, draft) VALUES('{article.Id}', '{article.Title}', '{article.Content}', '{article.Continent}', '{article.Draft}')");
     }
     
     //Get all article
@@ -58,7 +58,8 @@ public class Database
                     Id = reader.GetString(0),
                     Title = reader.GetString(1),
                     Content = reader.GetString(2),
-                    Continent = reader.GetString(3)
+                    Continent = reader.GetString(3),
+                    Draft = reader.GetBoolean(4)
                 });
             }
         }
@@ -81,7 +82,7 @@ public class Database
         var connections = coordinator.GetAllConnections();
         foreach (var connection in connections)
         {
-            Execute(connection, $"UPDATE Article SET title = '{article.Title}', content = '{article.Content}', continent = '{article.Continent}' WHERE id = '{id}'");
+            Execute(connection, $"UPDATE Article SET title = '{article.Title}', content = '{article.Content}', continent = '{article.Continent}', draft = '{article.Draft}' WHERE id = '{id}'");
         }
     }
 

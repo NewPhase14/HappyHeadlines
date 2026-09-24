@@ -12,6 +12,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHttpClient(
+    "DraftService",
+    client =>
+    {
+        client.BaseAddress =
+            new Uri("http://draft-service:8080/");
+
+        client.Timeout = TimeSpan.FromSeconds(2);
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

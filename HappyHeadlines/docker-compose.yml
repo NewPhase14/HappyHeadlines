@@ -224,6 +224,24 @@
     ports:
       - "5004:8080"
   
+  publisher-service:
+    build:
+      context: .
+      dockerfile: PublisherService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    ports:
+      - "5005:8080"
+    
+  newsletter-service:
+    build:
+      context: .
+      dockerfile: NewsletterService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    ports:
+      - "5006:8080"
+
   seq:
     image: datalust/seq
     ports:

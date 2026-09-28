@@ -33,7 +33,6 @@ public class Database
         }
     }
     
-    
     //Insert an article into a specific continent database
     public void InsertArticle(Article article)
     {

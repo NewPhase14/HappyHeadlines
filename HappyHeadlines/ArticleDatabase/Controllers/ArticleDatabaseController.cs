@@ -4,7 +4,7 @@ namespace ArticleDatabase.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class DatabaseController : ControllerBase
+public class ArticleDatabaseController : ControllerBase
 {
     private Database database = Database.GetInstance();
     

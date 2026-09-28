@@ -134,6 +134,7 @@
       dockerfile: ArticleService/Dockerfile
     depends_on:
       - article-database
+      - article-queue-rabbitmq
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       AFRICA_DB_CONNECTION: "Host=africa-db;Port=5432;Database=africa;Username=admin;Password=admin"
@@ -144,6 +145,7 @@
       ANTARCTICA_DB_CONNECTION: "Host=antarctica-db;Port=5432;Database=antarctica;Username=admin;Password=admin"
       OCEANIA_DB_CONNECTION: "Host=oceania-db;Port=5432;Database=oceania;Username=admin;Password=admin"
       GLOBAL_DB_CONNECTION: "Host=global-db;Port=5432;Database=global;Username=admin;Password=admin"
+      AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
     deploy:
       replicas: 3
   
@@ -153,6 +155,7 @@
       dockerfile: ArticleService/Dockerfile
     depends_on:
       - article-database
+      - article-queue-rabbitmq
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       AFRICA_DB_CONNECTION: "Host=africa-db;Port=5432;Database=africa;Username=admin;Password=admin"
@@ -163,6 +166,7 @@
       ANTARCTICA_DB_CONNECTION: "Host=antarctica-db;Port=5432;Database=antarctica;Username=admin;Password=admin"
       OCEANIA_DB_CONNECTION: "Host=oceania-db;Port=5432;Database=oceania;Username=admin;Password=admin"
       GLOBAL_DB_CONNECTION: "Host=global-db;Port=5432;Database=global;Username=admin;Password=admin"
+      AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
     ports:
       - "5001:8080"
      
@@ -230,6 +234,7 @@
       dockerfile: PublisherService/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
     ports:
       - "5005:8080"
     
@@ -237,8 +242,11 @@
     build:
       context: .
       dockerfile: NewsletterService/Dockerfile
+    depends_on:
+      - article-queue-rabbitmq
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
     ports:
       - "5006:8080"
 
@@ -257,6 +265,24 @@
     image: openzipkin/zipkin
     ports:
       - "9411:9411"
+  
+  article-queue-rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  
+  article-queue:
+    build:
+      context: .
+      dockerfile: ArticleQueue/Dockerfile
+    depends_on:
+      - article-queue-rabbitmq
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
+    ports:
+      - "8000:80"
   
 volumes:
     africa-db-data:

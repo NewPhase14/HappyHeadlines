@@ -1,3 +1,8 @@
+using ArticleQueue.Interfaces;
+using ArticleQueues.Configuration;
+using ArticleQueues.Factories;
+using PublisherService.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +11,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<IArticlePublisher>(new ArticlePublisher(
+    RabbitMQFactory.Create(
+        new ArticleQueueOptions { ConnectionString = Environment.GetEnvironmentVariable(
+            "AppOptions__RABBITMQ_HOST"), MessagingProvider = MessagingProvider.RabbitMQ}
+    )
+));
 
 var app = builder.Build();
 

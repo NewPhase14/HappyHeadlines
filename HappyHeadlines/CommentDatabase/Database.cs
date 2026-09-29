@@ -61,7 +61,29 @@ public class Database
          }
         return comments;
     }
-
+    
+    //Get comments by article id
+    public List<Comment> GetCommentsByArticleId(string articleId)
+    {
+        var comments = new List<Comment>();
+        
+         var cmd = connection.CreateCommand();
+         cmd.CommandText = $"SELECT * FROM Comment WHERE article_id = '{articleId}'";
+         using var reader = cmd.ExecuteReader();
+         while (reader.Read())
+         {
+             comments.Add(new Comment
+             {
+                 Id = reader.GetString(0),
+                 ArticleId = reader.GetString(1),
+                 Message = reader.GetString(2),
+                 Author = reader.GetString(3),
+                 CreatedAt = reader.GetDateTime(4),
+             });
+         }
+        return comments;
+    }
+    
     private void Execute(string sql)
     {
         using var trans = connection.BeginTransaction();

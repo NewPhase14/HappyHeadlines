@@ -14,8 +14,6 @@ namespace ArticleService.Controllers;
 [Route("[controller]")]
 public class ArticleServiceController(IArticleService articleService, TraceContextPropagator traceContextPropagator) : ControllerBase
 {
-    private Database database = Database.GetInstance();
-    
     [HttpPost(Name = "CreateArticle")]
     public async Task<IActionResult> CreateArticle([FromBody] Article article)
     {
@@ -46,47 +44,34 @@ public class ArticleServiceController(IArticleService articleService, TraceConte
     [HttpGet("getRandomArticle", Name = "GetRandomArticle")]
     public ActionResult<Article> GetRandomArticle()
     {
-        var articles = database.GetAllArticles();
-        if (articles.Count == 0)
-        {
-            return NotFound("No articles found.");
-        }
-
-        var random = new Random();
-        var newestArticle = articles[random.Next(articles.Count)];
-        
-
-        return Ok(newestArticle);
+        var articles = articleService.GetArticles();
+        return Ok(articles);
     }
 
     [HttpGet(Name = "GetArticles")]
     public ActionResult<List<Article>> GetArticles()
     {
-        return Ok(database.GetAllArticles());
+        return Ok(articleService.GetArticles());
     }
 
     [HttpDelete("{id}", Name = "DeleteArticle")]
     public IActionResult DeleteArticle(string id)
     {
-        database.DeleteArticle(id);
+        articleService.DeleteArticle(id);
         return Ok("Article deleted successfully");
     }
 
     [HttpPut("{id}", Name = "UpdateArticle")]
     public IActionResult UpdateArticle(string id, [FromBody] Article article)
     {
-        database.UpdateArticle(id, article);
+        articleService.UpdateArticle(id, article);
         return Ok("Article updated successfully");
     }
     
     [HttpGet("getArticleById/{articleId}", Name = "GetArticleById")]
-    public ActionResult<Article> GetArticleById(string articleId)
+    public async Task<IActionResult> GetArticleById(string articleId)
     {
-        var article = database.GetArticleById(articleId);
-        if (article is null)
-        {
-            return NotFound($"Article with ID {articleId} not found.");
-        }
+        var article = await articleService.GetArticleById(articleId);
         return Ok(article);
     }
 }

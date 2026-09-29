@@ -10,6 +10,8 @@ public class Article
 
     public string Continent { get; set; }
     
+    public List<Comment>? Comments { get; set; } 
+    
     public DateTime CreatedAt { get; set; }
     
     public bool Draft { get; set; }

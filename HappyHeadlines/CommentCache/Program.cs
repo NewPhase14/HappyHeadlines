@@ -1,3 +1,4 @@
+using CommentCache.Service;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,11 +9,24 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_CONNECTION"));
-IDatabase db = redis.GetDatabase();
+builder.Services.AddSingleton<ICommentCacheService, CommentCacheService>();
 
-db.StringSet("bike:1", "Process 134");
-Console.WriteLine(db.StringGet("bike:1"));
+builder.Services.AddHttpClient(
+    "CommentService",
+    client =>
+    {
+        client.BaseAddress =
+            new Uri("http://comment-service:8080/");
+
+        client.Timeout = TimeSpan.FromSeconds(2);
+    });
+
+
+var redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect(redisConnection)
+);
 
 var app = builder.Build();
 

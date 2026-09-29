@@ -14,7 +14,7 @@ public class ArticleCacheController(IArticleCacheService articleCacheService) : 
         return Ok();
     }
     
-    [HttpGet("getArticleAsync/{articleId}", Name = "GetRandomArticle")]
+    [HttpGet("getArticleAsync/{articleId}", Name = "GetArticleAsync")]
     public async Task<IActionResult> GetArticleAsync(string articleId)
     {
         var article = await articleCacheService.GetArticleAsync(articleId);

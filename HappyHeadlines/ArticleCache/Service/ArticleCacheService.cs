@@ -10,6 +10,7 @@ public class ArticleCacheService(IConnectionMultiplexer redis, IHttpClientFactor
 
     private readonly IDatabase database = redis.GetDatabase();
 
+    //TODO: Change when this should be called. (Maybe new endpoint in article service, that returns the 10 most recent articles and then it should call articleCacheService from there)
         
     public async Task<Article> GetArticleAsync(string articleId)
     {

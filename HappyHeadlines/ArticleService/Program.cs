@@ -20,6 +20,15 @@ builder.Services.AddSingleton<TraceContextPropagator>();
 
 builder.Services.AddSingleton<IArticleService, ArticleService.ArticleService>();
 
+builder.Services.AddHttpClient(
+    "CommentService",
+    client =>
+    {
+        client.BaseAddress = new Uri("http://comment-service:8080/");
+        client.Timeout = TimeSpan.FromSeconds(2);
+    });
+
+
 builder.Services.AddSingleton(
     RabbitHutch.CreateBus(builder.Configuration["AppOptions:RABBITMQ_HOST"]));
 builder.Services.AddHostedService<ArticleHandler>();

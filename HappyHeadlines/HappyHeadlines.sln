@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewsletterService", "Newsle
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleQueue", "ArticleQueue\ArticleQueue.csproj", "{7CAD80CD-6DEF-4346-A6D5-CEE3721260A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleCache", "ArticleCache\ArticleCache.csproj", "{6A77CCBE-76ED-41F3-A07F-1F3DA78674F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,5 +86,9 @@ Global
 		{7CAD80CD-6DEF-4346-A6D5-CEE3721260A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CAD80CD-6DEF-4346-A6D5-CEE3721260A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CAD80CD-6DEF-4346-A6D5-CEE3721260A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A77CCBE-76ED-41F3-A07F-1F3DA78674F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A77CCBE-76ED-41F3-A07F-1F3DA78674F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A77CCBE-76ED-41F3-A07F-1F3DA78674F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A77CCBE-76ED-41F3-A07F-1F3DA78674F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

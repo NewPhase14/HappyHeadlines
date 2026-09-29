@@ -129,6 +129,7 @@
       - redis
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      REDIS_CONNECTION: "redis:6379"
   
   article-cache:
     build:
@@ -138,6 +139,7 @@
       - redis
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      REDIS_CONNECTION: "redis:6379"
   
   article-database:
     build:

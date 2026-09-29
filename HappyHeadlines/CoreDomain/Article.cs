@@ -10,5 +10,7 @@ public class Article
 
     public string Continent { get; set; }
     
+    public DateTime CreatedAt { get; set; }
+    
     public bool Draft { get; set; }
 }

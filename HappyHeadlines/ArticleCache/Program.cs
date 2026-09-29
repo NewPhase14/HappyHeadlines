@@ -1,31 +1,38 @@
+using ArticleCache.Service;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_CONNECTION"));
-IDatabase db = redis.GetDatabase();
+var redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
 
-db.StringSet("bike:1", "Process 134");
-Console.WriteLine(db.StringGet("bike:1"));
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect(redisConnection)
+);
+
+builder.Services.AddSingleton<IArticleCacheService, ArticleCacheService>();
+
+builder.Services.AddHttpClient(
+    "ArticleService",
+    client =>
+    {
+        client.BaseAddress = new Uri("http://article-service:8080/");
+        client.Timeout = TimeSpan.FromSeconds(2);
+    });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();

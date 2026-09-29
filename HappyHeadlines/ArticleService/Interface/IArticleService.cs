@@ -4,5 +4,7 @@ namespace ArticleService.Interface;
 
 public interface IArticleService
 {
-    Task<bool> CreateArticle(Article article);
+    Task CreateArticle(Article article);
+    
+    Task<List<Article>> GetLatestArticles();
 }

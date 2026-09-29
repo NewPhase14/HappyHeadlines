@@ -27,12 +27,12 @@ public class Database
     
     public void RecreateDatabase()
     {
-        Execute( $"CREATE TABLE Draft(id VARCHAR PRIMARY KEY, title VARCHAR(100), content VARCHAR(1000), continent VARCHAR(50), draft BOOLEAN)");
+        Execute( $"CREATE TABLE Draft(id VARCHAR PRIMARY KEY, title VARCHAR(100), content VARCHAR(1000), continent VARCHAR(50), created_at TIMESTAMP WITH TIME ZONE, draft BOOLEAN)");
     }
     
     public void InsertDraft(Article article)
     {
-        Execute($"INSERT INTO Draft(id, title, content, continent, draft) VALUES('{article.Id}', '{article.Title}', '{article.Content}', '{article.Continent}', '{article.Draft}')");
+        Execute($"INSERT INTO Draft(id, title, content, continent, created_at, draft) VALUES('{article.Id}', '{article.Title}', '{article.Content}', '{article.Continent}', '{DateTime.UtcNow}', '{article.Draft}')");
     }
     
     public List<Article> GetAllDrafts()
@@ -50,7 +50,8 @@ public class Database
                  Title = reader.GetString(1),
                  Content = reader.GetString(2),
                  Continent = reader.GetString(3),
-                 Draft = reader.GetBoolean(4),
+                 CreatedAt = reader.GetDateTime(4),
+                 Draft = reader.GetBoolean(5),
              });
          }
          return drafts;

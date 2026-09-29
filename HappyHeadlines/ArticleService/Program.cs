@@ -16,23 +16,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<TraceContextPropagator>();
 
 builder.Services.AddSingleton<IArticleService, ArticleService.ArticleService>();
-builder.Services.AddSingleton<TraceContextPropagator>();
 
 builder.Services.AddSingleton(
     RabbitHutch.CreateBus(builder.Configuration["AppOptions:RABBITMQ_HOST"]));
 builder.Services.AddHostedService<ArticleHandler>();
-
-builder.Services.AddHttpClient(
-    "DraftService",
-    client =>
-    {
-        client.BaseAddress =
-            new Uri("http://draft-service:8080/");
-
-        client.Timeout = TimeSpan.FromSeconds(2);
-    });
 
 var app = builder.Build();
 

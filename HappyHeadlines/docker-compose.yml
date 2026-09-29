@@ -121,26 +121,6 @@
     volumes:
       - redis-data:/data
   
-  comment-cache:
-    build:
-      context: .
-      dockerfile: CommentCache/Dockerfile
-    depends_on:
-      - redis
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      REDIS_CONNECTION: "redis:6379"
-  
-  article-cache:
-    build:
-      context: .
-      dockerfile: ArticleCache/Dockerfile
-    depends_on:
-      - redis
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      REDIS_CONNECTION: "redis:6379"
-  
   article-database:
     build:
       context: .
@@ -276,6 +256,30 @@
       AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
     ports:
       - "5006:8080"
+    
+  comment-cache-service:
+    build:
+      context: .
+      dockerfile: CommentCache/Dockerfile
+    depends_on:
+      - redis
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      REDIS_CONNECTION: "redis:6379"
+    ports:
+      - "5007:8080"
+
+  article-cache-service:
+    build:
+      context: .
+      dockerfile: ArticleCache/Dockerfile
+    depends_on:
+      - redis
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      REDIS_CONNECTION: "redis:6379"
+    ports:
+      - "5008:8080"
 
   seq:
     image: datalust/seq

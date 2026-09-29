@@ -1,6 +1,6 @@
-using ArticleQueue.Interfaces;
 using ArticleQueues.Configuration;
 using ArticleQueues.Factories;
+using OpenTelemetry.Context.Propagation;
 using PublisherService.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +17,17 @@ builder.Services.AddSingleton<IArticlePublisher>(new ArticlePublisher(
             "AppOptions__RABBITMQ_HOST"), MessagingProvider = MessagingProvider.RabbitMQ}
     )
 ));
+
+builder.Services.AddSingleton<TraceContextPropagator>();
+builder.Services.AddHttpClient(
+    "DraftService",
+    client =>
+    {
+        client.BaseAddress =
+            new Uri("http://draft-service:8080/");
+
+        client.Timeout = TimeSpan.FromSeconds(2);
+    });
 
 var app = builder.Build();
 

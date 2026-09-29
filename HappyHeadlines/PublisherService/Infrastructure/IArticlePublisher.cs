@@ -1,4 +1,5 @@
 using CoreDomain;
+using Microsoft.AspNetCore.Mvc;
 
 namespace PublisherService.Infrastructure;
 

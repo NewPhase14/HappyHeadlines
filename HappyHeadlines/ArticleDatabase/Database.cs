@@ -29,7 +29,7 @@ public class Database
 
         foreach (var connection in connections)
         { 
-            Execute(connection, $"CREATE TABLE Article(id VARCHAR PRIMARY KEY, title VARCHAR(100), content VARCHAR(1000), continent VARCHAR(50), draft BOOLEAN)");
+            Execute(connection, $"CREATE TABLE Article(id VARCHAR PRIMARY KEY, title VARCHAR(100), content VARCHAR(1000), continent VARCHAR(50), created_at TIMESTAMP WITH TIME ZONE, draft BOOLEAN)");
         }
     }
     
@@ -37,7 +37,7 @@ public class Database
     public void InsertArticle(Article article)
     {
         var connection = coordinator.GetConnectionByServerName(article.Continent);
-        Execute(connection, $"INSERT INTO Article(id, title, content, continent, draft) VALUES('{article.Id}', '{article.Title}', '{article.Content}', '{article.Continent}', '{article.Draft}')");
+        Execute(connection, $"INSERT INTO Article(id, title, content, continent, created_at, draft) VALUES('{article.Id}', '{article.Title}', '{article.Content}', '{article.Continent}', '{DateTime.Now}', '{article.Draft}')");
     }
     
     //Get all article
@@ -58,7 +58,8 @@ public class Database
                     Title = reader.GetString(1),
                     Content = reader.GetString(2),
                     Continent = reader.GetString(3),
-                    Draft = reader.GetBoolean(4)
+                    CreatedAt = reader.GetDateTime(4),
+                    Draft = reader.GetBoolean(5)
                 });
             }
         }
@@ -83,6 +84,57 @@ public class Database
         {
             Execute(connection, $"UPDATE Article SET title = '{article.Title}', content = '{article.Content}', continent = '{article.Continent}', draft = '{article.Draft}' WHERE id = '{id}'");
         }
+    }
+    
+    //Get latest articles from all databases last 14 days
+    public List<Article> GetLatestArticles()
+    {
+        var articles = new List<Article>();
+        var connections = coordinator.GetAllConnections();
+        foreach (var connection in connections)
+        {
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT * FROM Article WHERE created_at >= NOW() - INTERVAL '14 days'";
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                articles.Add(new Article
+                {
+                    Id = reader.GetString(0),
+                    Title = reader.GetString(1),
+                    Content = reader.GetString(2),
+                    Continent = reader.GetString(3),
+                    CreatedAt = reader.GetDateTime(4),
+                    Draft = reader.GetBoolean(5)
+                });
+            }
+        }
+        return articles;
+    }
+    
+    //Get an article by its ID
+    public Article? GetArticleById(string id)
+    {
+        var connections = coordinator.GetAllConnections();
+        foreach (var connection in connections)
+        {
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = $"SELECT * FROM Article WHERE id = '{id}'";
+            using var reader = cmd.ExecuteReader();
+            if (reader.Read())
+            {
+                return new Article
+                {
+                    Id = reader.GetString(0),
+                    Title = reader.GetString(1),
+                    Content = reader.GetString(2),
+                    Continent = reader.GetString(3),
+                    CreatedAt = reader.GetDateTime(4),
+                    Draft = reader.GetBoolean(5)
+                };
+            }
+        }
+        return null;
     }
 
     private void Execute(DbConnection connection, string sql)

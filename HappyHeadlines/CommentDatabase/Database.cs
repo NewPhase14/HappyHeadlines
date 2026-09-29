@@ -30,14 +30,14 @@ public class Database
     
     public void RecreateDatabase()
     {
-        Execute( $"CREATE TABLE Comment(id VARCHAR PRIMARY KEY, message VARCHAR(1000), author VARCHAR(100))");
+        Execute( $"CREATE TABLE Comment(id VARCHAR PRIMARY KEY, article_id VARCHAR, message VARCHAR(1000), author VARCHAR(100), created_at TIMESTAMP WITH TIME ZONE)");
     }
     
     
     //Insert an article into a specific continent database
     public void InsertComment(Comment comment)
     {
-        Execute($"INSERT INTO Comment(id, message, author) VALUES('{comment.Id}', '{comment.Message}', '{comment.Author}')");
+        Execute($"INSERT INTO Comment(id, article_id, message, author, created_at) VALUES('{comment.Id}', '{comment.ArticleId}', '{comment.Message}', '{comment.Author}', '{DateTime.UtcNow}')");
     }
     
     //Get all comments
@@ -53,8 +53,10 @@ public class Database
              comments.Add(new Comment
              {
                  Id = reader.GetString(0),
-                 Message = reader.GetString(1),
-                 Author = reader.GetString(2),
+                 ArticleId = reader.GetString(1),
+                 Message = reader.GetString(2),
+                 Author = reader.GetString(3),
+                 CreatedAt = reader.GetDateTime(4),
              });
          }
         return comments;

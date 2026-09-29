@@ -113,7 +113,32 @@
       POSTGRES_DB: draft
     volumes:
       - draft-db-data:/var/lib/postgresql
-
+    
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+  
+  comment-cache:
+    build:
+      context: .
+      dockerfile: CommentCache/Dockerfile
+    depends_on:
+      - redis
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+  
+  article-cache:
+    build:
+      context: .
+      dockerfile: ArticleCache/Dockerfile
+    depends_on:
+      - redis
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+  
   article-database:
     build:
       context: .
@@ -297,4 +322,5 @@ volumes:
     profanity-db-data:
     rps_seq_data:
     draft-db-data:
+    redis-data:
     

@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleQueue", "ArticleQueu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleCache", "ArticleCache\ArticleCache.csproj", "{6A77CCBE-76ED-41F3-A07F-1F3DA78674F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentCache", "CommentCache\CommentCache.csproj", "{140FE46B-4F1C-4BC1-8EB3-1522177F7BB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,5 +92,9 @@ Global
 		{6A77CCBE-76ED-41F3-A07F-1F3DA78674F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A77CCBE-76ED-41F3-A07F-1F3DA78674F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A77CCBE-76ED-41F3-A07F-1F3DA78674F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{140FE46B-4F1C-4BC1-8EB3-1522177F7BB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{140FE46B-4F1C-4BC1-8EB3-1522177F7BB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{140FE46B-4F1C-4BC1-8EB3-1522177F7BB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{140FE46B-4F1C-4BC1-8EB3-1522177F7BB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

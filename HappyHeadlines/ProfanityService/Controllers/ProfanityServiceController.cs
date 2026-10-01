@@ -1,18 +1,35 @@
+using CoreDomain.Dtos.ProfanityDtos;
 using Microsoft.AspNetCore.Mvc;
+using ProfanityService.Service;
 
 namespace ProfanityService.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ProfanityServiceController : ControllerBase
+public class ProfanityServiceController(IProfanityService profanityService) : ControllerBase
 {
-    private readonly ProfanityService profanityService = new ProfanityService();
-
     [HttpPost("checkProfanity")]
-    public ActionResult<bool> CheckProfanity([FromBody] string message)
+    public async Task<ActionResult<bool>> CheckProfanity([FromBody] string message)
     {
-        var containsProfanity = profanityService.ContainsProfanity(message);
+        var containsProfanity = await profanityService.ContainsProfanity(message);
 
         return Ok(containsProfanity);
+    }
+
+    [HttpPost(Name = "CreateWord")]
+    public async Task<ActionResult<ProfanityResponseDto>> CreateProfanity(
+        [FromBody] CreateProfanityDto createProfanityDto)
+    {
+        var word = await profanityService.CreateProfanity(createProfanityDto);
+
+        return Ok(word);
+    }
+
+    [HttpGet(Name = "GetAllProfanities")]
+    public async Task<ActionResult<List<ProfanityResponseDto>>> GetAllProfanities()
+    {
+        var profanities = await profanityService.GetAllProfanities();
+
+        return Ok(profanities);
     }
 }

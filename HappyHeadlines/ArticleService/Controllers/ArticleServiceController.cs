@@ -1,21 +1,22 @@
 using System.Diagnostics;
-using ArticleDatabase;
-using ArticleService.Interface;
-using CoreDomain;
+using ArticleService.Service;
+using CoreDomain.Dtos.ArticleDtos;
 using Microsoft.AspNetCore.Mvc;
 using Monitoring;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
-using Serilog;
 
 namespace ArticleService.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ArticleServiceController(IArticleService articleService, TraceContextPropagator traceContextPropagator) : ControllerBase
+public class ArticleServiceController(
+    IArticleService articleService,
+    TraceContextPropagator traceContextPropagator) : ControllerBase
 {
     [HttpPost(Name = "CreateArticle")]
-    public async Task<IActionResult> CreateArticle([FromBody] Article article)
+    public async Task<ActionResult<ArticleResponseDto>> CreateArticle(
+        [FromBody] CreateArticleDto createArticleDto)
     {
         // Extract context sent from Publisher
         var parentContext = traceContextPropagator.Extract(
@@ -24,54 +25,62 @@ public class ArticleServiceController(IArticleService articleService, TraceConte
             (request, key) => request.Headers[key].ToArray());
 
         Baggage.Current = parentContext.Baggage;
-        
+
         using var activity = MonitoringService.ActivitySource.StartActivity(
-            "ArticleService.CreateArticle", 
-            ActivityKind.Consumer, 
+            "ArticleService.CreateArticle",
+            ActivityKind.Consumer,
             parentContext.ActivityContext);
-        
-        await articleService.CreateArticle(article);
-        return Ok();
+
+        var article = await articleService.CreateArticle(createArticleDto);
+
+        return Ok(article);
     }
-    
+
+    [HttpGet(Name = "GetAllArticles")]
+    public async Task<ActionResult<List<ArticleResponseDto>>> GetAllArticles()
+    {
+        var articles = await articleService.GetAllArticles();
+
+        return Ok(articles);
+    }
+
     [HttpGet("getLatestArticles", Name = "GetLatestArticles")]
-    public async Task<ActionResult<List<Article>>> GetLatestArticles()
+    public async Task<ActionResult<List<ArticleResponseDto>>> GetLatestArticles()
     {
         var articles = await articleService.GetLatestArticles();
+
         return Ok(articles);
     }
 
     [HttpGet("getRandomArticle", Name = "GetRandomArticle")]
-    public ActionResult<Article> GetRandomArticle()
+    public async Task<ActionResult<ArticleResponseDto>> GetRandomArticle()
     {
-        var articles = articleService.GetArticles();
-        return Ok(articles);
+        var article = await articleService.GetRandomArticle();
+
+        return Ok(article);
     }
 
-    [HttpGet(Name = "GetArticles")]
-    public ActionResult<List<Article>> GetArticles()
+    [HttpGet("{articleId}", Name = "GetArticleById")]
+    public async Task<ActionResult<ArticleResponseDto>> GetArticleById(string articleId)
     {
-        return Ok(articleService.GetArticles());
+        var article = await articleService.GetArticleById(articleId);
+
+        return Ok(article);
+    }
+
+    [HttpPut(Name = "UpdateArticle")]
+    public async Task<ActionResult<ArticleResponseDto>> UpdateArticle([FromBody] UpdateArticleDto updateArticleDto)
+    {
+        var updatedArticle = await articleService.UpdateArticle(updateArticleDto);
+
+        return Ok(updatedArticle);
     }
 
     [HttpDelete("{id}", Name = "DeleteArticle")]
-    public IActionResult DeleteArticle(string id)
+    public async Task<IActionResult> DeleteArticle(string id)
     {
-        articleService.DeleteArticle(id);
-        return Ok("Article deleted successfully");
-    }
+        await articleService.DeleteArticle(id);
 
-    [HttpPut("{id}", Name = "UpdateArticle")]
-    public IActionResult UpdateArticle(string id, [FromBody] Article article)
-    {
-        articleService.UpdateArticle(id, article);
-        return Ok("Article updated successfully");
-    }
-    
-    [HttpGet("getArticleById/{articleId}", Name = "GetArticleById")]
-    public async Task<IActionResult> GetArticleById(string articleId)
-    {
-        var article = await articleService.GetArticleById(articleId);
-        return Ok(article);
+        return Ok("Article deleted successfully");
     }
 }

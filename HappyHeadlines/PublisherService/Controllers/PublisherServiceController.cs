@@ -1,7 +1,5 @@
 using System.Diagnostics;
-using ArticleQueue.Interfaces;
-using CoreDomain;
-using EasyNetQ;
+using CoreDomain.Dtos.ArticleDtos;
 using Microsoft.AspNetCore.Mvc;
 using Monitoring;
 using OpenTelemetry;
@@ -12,69 +10,56 @@ namespace PublisherService.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PublisherServiceController(IArticlePublisher articlePublisher, IHttpClientFactory httpClientFactory, TraceContextPropagator traceContextPropagator) : ControllerBase
+public class PublisherServiceController(
+    IArticlePublisher articlePublisher,
+    IHttpClientFactory httpClientFactory,
+    TraceContextPropagator traceContextPropagator) : ControllerBase
 {
     private readonly HttpClient draftClient = httpClientFactory.CreateClient("DraftService");
-    
+
     [HttpPost(Name = "PublishArticle")]
-    public async Task<IActionResult> PublishArticle([FromBody] Article article)
+    public async Task<IActionResult> PublishArticle([FromBody] CreateArticleDto createArticleDto)
     {
         //TODO: Error: Getting double messages on newsletter service. On article service they are split.
-        
-        
-       using var activity =
-            MonitoringService.ActivitySource.StartActivity();
 
-        if (article.Draft)
+        using var activity = MonitoringService.ActivitySource.StartActivity();
+
+        if (createArticleDto.Draft)
         {
-            try
-            {
-                MonitoringService.log.Debug("Sending draft article to DraftService for creation.");
-                
-                var request = new HttpRequestMessage(
-                    HttpMethod.Post,
-                    "DraftService/createDraft");
+            MonitoringService.log.Debug(
+                "Sending draft article to DraftService for creation.");
 
-                request.Content = JsonContent.Create(article);
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                "DraftService/createDraft");
 
-                var activityContext = activity?.Context ?? Activity.Current?.Context ?? default;
-                var propagationContext = new PropagationContext(activityContext, Baggage.Current);
-                
-                // Inject current Activity into HTTP headers
-                traceContextPropagator.Inject(
-                    propagationContext,
-                    request,
-                    (request, key, value) =>
-                    {
-                        request.Headers.Add(key, value);
-                    });
+            request.Content = JsonContent.Create(createArticleDto);
 
-                var response = await draftClient.SendAsync(request);
+            var activityContext =
+                activity?.Context ??
+                Activity.Current?.Context ??
+                default;
 
-                Console.WriteLine($"DraftService status: {response.StatusCode}");
+            var propagationContext =
+                new PropagationContext(activityContext, Baggage.Current);
 
-                var responseBody = response.Content.ReadAsStringAsync();
-                Console.WriteLine($"DraftService response: {responseBody}");
-            }
-            catch (HttpRequestException ex)
-            {
-                MonitoringService.log.Error("Failed to send draft article to DraftService.", ex);
-                Console.WriteLine($"DraftService unavailable: {ex.Message}");
-            }
-            catch (TaskCanceledException ex)
-            {
-                MonitoringService.log.Error("Failed to send draft article to DraftService.", ex);
-                Console.WriteLine($"DraftService timed out: {ex.Message}");
-            }
-        }
-        else
-        {
-            await articlePublisher.PublishArticle(article);
-            MonitoringService.log.Debug("Creating article in database.");
+            traceContextPropagator.Inject(
+                propagationContext,
+                request,
+                (request, key, value) => { request.Headers.TryAddWithoutValidation(key, value); });
+
+            var response = await draftClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+                return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
             return Ok();
         }
-        return BadRequest();
+
+        await articlePublisher.PublishArticle(createArticleDto);
+
+        MonitoringService.log.Debug("Creating article in database.");
+
+        return Ok();
     }
-    
-    
 }

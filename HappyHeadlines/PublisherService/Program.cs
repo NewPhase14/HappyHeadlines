@@ -1,5 +1,5 @@
-using ArticleQueues.Configuration;
-using ArticleQueues.Factories;
+using ArticleQueue.Configuration;
+using ArticleQueue.Factories;
 using OpenTelemetry.Context.Propagation;
 using PublisherService.Infrastructure;
 
@@ -13,8 +13,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IArticlePublisher>(new ArticlePublisher(
     RabbitMQFactory.Create(
-        new ArticleQueueOptions { ConnectionString = Environment.GetEnvironmentVariable(
-            "AppOptions__RABBITMQ_HOST"), MessagingProvider = MessagingProvider.RabbitMQ}
+        new ArticleQueueOptions
+        {
+            ConnectionString = Environment.GetEnvironmentVariable(
+                "AppOptions__RABBITMQ_HOST"),
+            MessagingProvider = MessagingProvider.RabbitMQ
+        }
     )
 ));
 
@@ -36,7 +40,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
 }
 
 app.UseHttpsRedirection();

@@ -1,14 +1,13 @@
 using ArticleQueue.Interfaces;
-using CoreDomain;
+using CoreDomain.Dtos.ArticleDtos;
 
 namespace PublisherService.Infrastructure;
 
 public class ArticlePublisher(IArticleQueue articleQueue) : IArticlePublisher
 {
-    public async Task PublishArticle(Article article)
+    public async Task PublishArticle(CreateArticleDto createArticleDto)
     {
-        await articleQueue.PublishAsync("article-published", article);
-        await articleQueue.PublishAsync("newsletter-published", article);
+        await articleQueue.PublishAsync("article-published", createArticleDto);
+        await articleQueue.PublishAsync("newsletter-published", createArticleDto);
     }
-    
 }

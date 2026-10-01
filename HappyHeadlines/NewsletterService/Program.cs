@@ -1,4 +1,3 @@
-using CoreDomain;
 using EasyNetQ;
 using NewsletterService;
 
@@ -30,7 +29,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
 }
 
 app.UseHttpsRedirection();

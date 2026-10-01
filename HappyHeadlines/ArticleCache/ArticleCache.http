@@ -1,6 +1,0 @@
-@ArticleCache_HostAddress = http://localhost:5007
-
-GET {{ArticleCache_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -93,6 +93,8 @@
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: comment
+    ports:
+      - "5440:5432"
     volumes:
       - comment-db-data:/var/lib/postgresql
     
@@ -102,6 +104,8 @@
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: profanity
+    ports:
+      - "5441:5432"
     volumes:
       - profanity-db-data:/var/lib/postgresql
   
@@ -111,6 +115,8 @@
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: draft
+    ports:
+      - "5442:5432"
     volumes:
       - draft-db-data:/var/lib/postgresql
     
@@ -302,6 +308,12 @@
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
   
   article-queue:
     build:

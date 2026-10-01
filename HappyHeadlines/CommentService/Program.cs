@@ -1,12 +1,22 @@
+using CommentDatabase;
+using CommentDatabase.Repository;
 using CommentService.Service;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddSingleton<ICommentService, CommentService.Service.CommentService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ICommentService, CommentService.Service.CommentService>();
+
+builder.Services.AddDbContext<CommentContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration["COMMENT_DB_CONNECTION"]
+    ));
+
 builder.Services.AddHttpClient(
     "ProfanityService",
     client =>
@@ -34,7 +44,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
 }
 
 app.UseHttpsRedirection();

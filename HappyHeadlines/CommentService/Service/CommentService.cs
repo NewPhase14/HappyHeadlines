@@ -1,71 +1,92 @@
-using CommentDatabase;
+using CommentDatabase.Repository;
 using CoreDomain;
+using CoreDomain.Dtos.CommentDtos;
 
 namespace CommentService.Service;
 
-public class CommentService(IHttpClientFactory httpClientFactory) : ICommentService
+public class CommentService(IHttpClientFactory httpClientFactory, ICommentRepository commentRepository)
+    : ICommentService
 {
-    private readonly Database database = Database.GetInstance();
-    private readonly HttpClient profanityClient = httpClientFactory.CreateClient("ProfanityService");
-    private readonly HttpClient commentCacheClient = httpClientFactory.CreateClient("CommentCacheService");
-    
-    public async Task CreateComment(Comment comment)
+    private readonly HttpClient _commentCacheClient = httpClientFactory.CreateClient("CommentCacheService");
+    private readonly HttpClient _profanityClient = httpClientFactory.CreateClient("ProfanityService");
+
+    public async Task<CommentResponseDto> CreateComment(CreateCommentDto createCommentDto)
     {
-        try
-        {
-            var response = await profanityClient.PostAsJsonAsync(
-                "ProfanityService/checkProfanity",
-                comment.Message);
+        var response = await _profanityClient.PostAsJsonAsync(
+            "ProfanityService/checkProfanity",
+            createCommentDto.Message);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException("Profanity service is unavailable.");
-            }
+        if (!response.IsSuccessStatusCode) throw new HttpRequestException("Profanity service is unavailable.");
 
-            var containsProfanity =
-                await response.Content.ReadFromJsonAsync<bool>();
+        var containsProfanity = await response.Content.ReadFromJsonAsync<bool>();
 
-            if (containsProfanity)
-            {
-                throw new HttpRequestException(
-                    "Comment contains profanity and cannot be added.");
-            }
-        }
-        catch (HttpRequestException)
+        if (containsProfanity) throw new Exception("Comment contains profanity and cannot be added.");
+
+        var comment = new Comment
         {
-            throw new HttpRequestException(
-                "Profanity service is unavailable.");
-        }
-        try
+            Id = Guid.NewGuid().ToString(),
+            ArticleId = createCommentDto.ArticleId,
+            Message = createCommentDto.Message,
+            Author = createCommentDto.Author,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var createdComment = await commentRepository.CreateComment(comment);
+        return new CommentResponseDto
         {
-            database.InsertComment(comment);
-        }
-        catch
-        {
-            throw new HttpRequestException(
-                "Comment database is unavailable.");
-        }
+            Id = createdComment.Id,
+            ArticleId = createdComment.ArticleId,
+            Message = createdComment.Message,
+            Author = createdComment.Author,
+            CreatedAt = createdComment.CreatedAt
+        };
     }
 
-    public Task<List<Comment>> GetComments()
+    public async Task<List<CommentResponseDto>> GetAllComments()
     {
-        var comments = database.GetAllComments();
-        
-        return Task.FromResult(comments);
+        var comments = await commentRepository.GetAllComments();
+
+        if (comments.Count == 0) throw new InvalidOperationException("No comments found.");
+
+        return comments.Select(c => new CommentResponseDto
+        {
+            Id = c.Id,
+            ArticleId = c.ArticleId,
+            Message = c.Message,
+            Author = c.Author,
+            CreatedAt = c.CreatedAt
+        }).ToList();
     }
 
-    public async Task<List<Comment>> GetCommentCacheAsync(string articleId)
+    public async Task<List<CommentResponseDto>> GetCommentCacheAsync(string articleId)
     {
-        var response = await commentCacheClient.GetAsync($"CommentCache/getCommentsByArticleId/{articleId}");
+        var response = await _commentCacheClient.GetAsync($"CommentCache/getCommentsByArticleId/{articleId}");
 
         var comments = await response.Content.ReadFromJsonAsync<List<Comment>>();
-        
-        return comments ?? new List<Comment>();
+
+        if (comments == null) throw new InvalidOperationException("No comments found for the specified article.");
+
+        return comments.Select(c => new CommentResponseDto
+        {
+            Id = c.Id,
+            ArticleId = c.ArticleId,
+            Message = c.Message,
+            Author = c.Author,
+            CreatedAt = c.CreatedAt
+        }).ToList();
     }
 
-    public Task<List<Comment>> GetCommentsByArticleId(string articleId)
+    public async Task<List<CommentResponseDto>> GetCommentsByArticleId(string articleId)
     {
-        var comments = database.GetCommentsByArticleId(articleId);
-        return Task.FromResult(comments);
+        var comments = await commentRepository.GetCommentsByArticleId(articleId);
+        return (comments ?? throw new InvalidOperationException("No comments found for the specified article."))
+            .Select(c => new CommentResponseDto
+            {
+                Id = c.Id,
+                ArticleId = c.ArticleId,
+                Message = c.Message,
+                Author = c.Author,
+                CreatedAt = c.CreatedAt
+            }).ToList();
     }
 }

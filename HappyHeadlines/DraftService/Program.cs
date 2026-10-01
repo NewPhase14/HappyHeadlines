@@ -1,3 +1,7 @@
+using DraftDatabase;
+using DraftDatabase.Repository;
+using DraftService.Service;
+using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Context.Propagation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,9 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 builder.Services.AddSingleton<TraceContextPropagator>();
 
+builder.Services.AddScoped<IDraftRepository, DraftRepository>();
+builder.Services.AddScoped<IDraftService, DraftService.Service.DraftService>();
+
+
+builder.Services.AddDbContext<DraftContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration["DRAFT_DB_CONNECTION"]
+    ));
 
 var app = builder.Build();
 
@@ -18,7 +29,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
 }
 
 app.UseHttpsRedirection();

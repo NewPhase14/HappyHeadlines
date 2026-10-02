@@ -18,31 +18,31 @@ public class ArticleHandler(
             $"Creating RabbitMQ subscription. PID={Environment.ProcessId}");
 
         await bus.PubSub.SubscribeAsync<CreateArticleDto>(
-            "article-published",
-            async createArticleDto =>
+            "article-service",
+             createArticleDto =>
             {
                 Console.WriteLine(
                     $"[{Environment.MachineName}] Received message: " +
                     $"{createArticleDto.Title} - {createArticleDto.Content}");
 
-                await using var scope =
-                    scopeFactory.CreateAsyncScope();
+                using var scope = scopeFactory.CreateAsyncScope();
 
                 var articleService =
                     scope.ServiceProvider
                         .GetRequiredService<IArticleService>();
 
-                await articleService.CreateArticle(createArticleDto);
+                articleService.CreateArticle(createArticleDto);
             },
-            stoppingToken);
+            x => x.WithTopic("article-published"),
+            stoppingToken); 
 
         Console.WriteLine("Subscribed to article-published");
 
         try
         {
-            await Task.Delay(
-                Timeout.Infinite,
-                stoppingToken);
+             await Task.Delay(
+                 Timeout.Infinite,
+                 stoppingToken);
         }
         catch (OperationCanceledException)
         {

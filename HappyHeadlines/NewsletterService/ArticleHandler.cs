@@ -16,13 +16,14 @@ public class ArticleHandler(IBus bus) : BackgroundService
             $"Creating RabbitMQ subscription. PID={Environment.ProcessId}");
 
         await bus.PubSub.SubscribeAsync<CreateArticleDto>(
-            "newsletter-published",
-            createArticleDto =>
+            "newsletter-service",
+             createArticleDto =>
             {
                 Console.WriteLine(
                     $"[{Environment.MachineName}] Received message: " +
                     $"{createArticleDto.Title} - {createArticleDto.Content}");
             },
+            x => x.WithTopic("newsletter-published"),
             stoppingToken);
 
         Console.WriteLine("Subscribed to newsletter-published");

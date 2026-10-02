@@ -1,67 +1,37 @@
-using System.Data.Common;
-using CoreDomain;
-using Npgsql;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace ArticleDatabase;
 
 public class Coordinator
 {
-    private IDictionary<string, DbConnection> ConnectionCache = new Dictionary<string, DbConnection>();
-    
-    // Database for each continent + global database
-    private DatabaseStruct ASIA_DB = new DatabaseStruct { name = "ASIA"};
-    private DatabaseStruct EUROPE_DB = new DatabaseStruct { name = "EUROPE" };
-    private DatabaseStruct NORTH_AMERICA_DB = new DatabaseStruct { name = "NORTH_AMERICA" };
-    private DatabaseStruct SOUTH_AMERICA_DB = new DatabaseStruct { name = "SOUTH_AMERICA" };
-    private DatabaseStruct AFRICA_DB = new DatabaseStruct { name = "AFRICA"};
-    private DatabaseStruct OCEANIA_DB = new DatabaseStruct { name = "OCEANIA" };
-    private DatabaseStruct ANTARCTICA_DB = new DatabaseStruct { name = "ANTARCTICA" };
-    private DatabaseStruct GLOBAL_DB = new DatabaseStruct { name = "GLOBAL"};
-    
-    public List<DbConnection> GetAllConnections()
+    private readonly Dictionary<string, string?> _connectionStrings = new()
     {
-        List<DbConnection> connections = new List<DbConnection>();
+        ["Asia"] = Environment.GetEnvironmentVariable("ASIA_DB_CONNECTION"),
+        ["Europe"] = Environment.GetEnvironmentVariable("EUROPE_DB_CONNECTION"),
+        ["North America"] = Environment.GetEnvironmentVariable("NORTH_AMERICA_DB_CONNECTION"),
+        ["South America"] = Environment.GetEnvironmentVariable("SOUTH_AMERICA_DB_CONNECTION"),
+        ["Africa"] = Environment.GetEnvironmentVariable("AFRICA_DB_CONNECTION"),
+        ["Oceania"] = Environment.GetEnvironmentVariable("OCEANIA_DB_CONNECTION"),
+        ["Antarctica"] = Environment.GetEnvironmentVariable("ANTARCTICA_DB_CONNECTION"),
+        ["Global"] = Environment.GetEnvironmentVariable("GLOBAL_DB_CONNECTION")
+    };
 
-        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("ASIA_DB_CONNECTION")));
-        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("EUROPE_DB_CONNECTION")));
-        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("NORTH_AMERICA_DB_CONNECTION")));
-        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("SOUTH_AMERICA_DB_CONNECTION")));
-        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("AFRICA_DB_CONNECTION")));
-        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("OCEANIA_DB_CONNECTION")));
-        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("ANTARCTICA_DB_CONNECTION")));
-        connections.Add(new NpgsqlConnection(Environment.GetEnvironmentVariable("GLOBAL_DB_CONNECTION")));
+    public ArticleContext GetContext(string continent)
+    {
+        if (!_connectionStrings.TryGetValue(continent, out var connectionString))
+            throw new ArgumentException($"Invalid continent: {continent}");
 
-        foreach (var connection in connections)
-        {
-            connection.Open();
-        }
-        return connections;
+        var options = new DbContextOptionsBuilder<ArticleContext>()
+            .UseNpgsql(connectionString)
+            .Options;
+
+        return new ArticleContext(options);
     }
 
-    public DbConnection GetConnectionByServerName(string serverName)
+    public IEnumerable<ArticleContext> GetAllContexts()
     {
-        var databaseStruct = serverName switch
-        {
-            "Asia" => ASIA_DB,
-            "Europe" => EUROPE_DB,
-            "North America" => NORTH_AMERICA_DB,
-            "South America" => SOUTH_AMERICA_DB,   
-            "Africa" => AFRICA_DB,
-            "Oceania" => OCEANIA_DB,
-            "Antarctica" => ANTARCTICA_DB,
-            "Global" => GLOBAL_DB,
-            _ => throw new ArgumentException($"Invalid server name: {serverName}")
-        };
-        
-        if (ConnectionCache.TryGetValue(serverName, out var connection))
-        {
-            return connection;
-        }
-        
-        connection = new NpgsqlConnection(Environment.GetEnvironmentVariable($"{databaseStruct.name}_DB_CONNECTION"));
-        connection.Open();
-        ConnectionCache.Add(serverName, connection);
-        return connection;
+        return _connectionStrings.Values.Select(connectionString => new DbContextOptionsBuilder<ArticleContext>()
+            .UseNpgsql(connectionString)
+            .Options).Select(options => new ArticleContext(options));
     }
 }

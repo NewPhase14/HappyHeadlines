@@ -1,9 +1,8 @@
-using CoreDomain;
-using Microsoft.AspNetCore.Mvc;
+using CoreDomain.Dtos.ArticleDtos;
 
 namespace PublisherService.Infrastructure;
 
 public interface IArticlePublisher
 {
-    public Task PublishArticle(Article article);
+    public Task PublishArticle(CreateArticleDto createArticleDto);
 }

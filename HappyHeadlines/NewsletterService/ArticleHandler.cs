@@ -1,4 +1,4 @@
-using CoreDomain;
+using CoreDomain.Dtos.ArticleDtos;
 using EasyNetQ;
 
 namespace NewsletterService;
@@ -12,13 +12,18 @@ public class ArticleHandler(IBus bus) : BackgroundService
 
         Console.WriteLine("Connected to RabbitMQ");
 
-        await bus.PubSub.SubscribeAsync<Article>(
-            "newsletter-published",
-            msg =>
+        Console.WriteLine(
+            $"Creating RabbitMQ subscription. PID={Environment.ProcessId}");
+
+        await bus.PubSub.SubscribeAsync<CreateArticleDto>(
+            "newsletter-service",
+             createArticleDto =>
             {
                 Console.WriteLine(
-                    $"Received message: {msg.Id} - {msg.Title}");
+                    $"[{Environment.MachineName}] Received message: " +
+                    $"{createArticleDto.Title} - {createArticleDto.Content}");
             },
+            x => x.WithTopic("newsletter-published"),
             stoppingToken);
 
         Console.WriteLine("Subscribed to newsletter-published");

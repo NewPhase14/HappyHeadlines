@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using CoreDomain;
-using DraftDatabase;
+using CoreDomain.Dtos.ArticleDtos;
+using DraftService.Service;
 using Microsoft.AspNetCore.Mvc;
 using Monitoring;
 using OpenTelemetry;
@@ -10,12 +10,11 @@ namespace DraftService.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class DraftServiceController(TraceContextPropagator traceContextPropagator) : ControllerBase
+public class DraftServiceController(TraceContextPropagator traceContextPropagator, IDraftService draftService)
+    : ControllerBase
 {
-    private Database database = Database.GetInstance();
-    
     [HttpPost("createDraft", Name = "CreateDraft")]
-    public IActionResult CreateDraft([FromBody] Article article)
+    public async Task<ActionResult<ArticleResponseDto>> CreateDraft([FromBody] CreateArticleDto createDraftDto)
     {
         // Extract context sent from ArticleService
         var parentContext = traceContextPropagator.Extract(
@@ -24,36 +23,39 @@ public class DraftServiceController(TraceContextPropagator traceContextPropagato
             (request, key) => request.Headers[key].ToArray());
 
         Baggage.Current = parentContext.Baggage;
-        
+
         using var activity = MonitoringService.ActivitySource.StartActivity(
-            "DraftService.CreateDraft", 
-            ActivityKind.Consumer, 
+            "DraftService.CreateDraft",
+            ActivityKind.Consumer,
             parentContext.ActivityContext);
-        
-        database.InsertDraft(article);
-        return Ok();
+
+        var draft = await draftService.CreateDraft(createDraftDto);
+
+        return Ok(draft);
     }
 
-    [HttpGet(Name = "GetDrafts")]
-    public ActionResult<List<Article>>GetDrafts()
+    [HttpGet(Name = "GetAllDrafts")]
+    public async Task<ActionResult<List<ArticleResponseDto>>> GetAllDrafts()
     {
-        return Ok(database.GetAllDrafts());
+        var drafts = await draftService.GetAllDrafts();
+
+        return Ok(drafts);
+    }
+
+    [HttpPut(Name = "UpdateDraft")]
+    public async Task<ActionResult<ArticleResponseDto>> UpdateDraft([FromBody] UpdateArticleDto updateDraftDto)
+    {
+        //TODO: If draft is updates from draft to non-draft, it should be deleted from DraftDatabase and inserted into ArticleDatabase.
+
+        var updatedDraft = await draftService.UpdateDraft(updateDraftDto);
+        return Ok(updatedDraft);
     }
 
     [HttpDelete("{id}", Name = "DeleteDraft")]
-    public IActionResult DeleteDraft(string id)
+    public async Task<IActionResult> DeleteDraft(string id)
     {
-        database.DeleteDraft(id);
+        await draftService.DeleteDraft(id);
+
         return Ok("Draft deleted successfully");
     }
-
-    [HttpPut("{id}", Name = "UpdateDraft")]
-    public IActionResult UpdateDraft(string id, [FromBody] Article article)
-    {
-        //TODO: If draft is updates from draft to non-draft, it should be deleted from DraftDatabase and inserted into ArticleDatabase.
-        
-        database.UpdateDraft(id, article);
-        return Ok("Draft updated successfully");
-    }
-
 }

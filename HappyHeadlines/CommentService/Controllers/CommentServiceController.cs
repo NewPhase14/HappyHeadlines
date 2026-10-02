@@ -1,6 +1,5 @@
-using CommentDatabase;
 using CommentService.Service;
-using CoreDomain;
+using CoreDomain.Dtos.CommentDtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CommentService.Controllers;
@@ -10,27 +9,27 @@ namespace CommentService.Controllers;
 public class CommentServiceController(ICommentService commentService) : ControllerBase
 {
     [HttpPost(Name = "CreateComment")]
-    public async Task<IActionResult> CreateComment([FromBody] Comment comment)
+    public async Task<ActionResult<CommentResponseDto>> CreateComment([FromBody] CreateCommentDto createCommentDto)
     {
-        await commentService.CreateComment(comment);
-        return Ok();
+        var comment = await commentService.CreateComment(createCommentDto);
+        return Ok(comment);
     }
 
     [HttpGet(Name = "GetComments")]
-    public ActionResult<List<Comment>> GetComments()
+    public async Task<ActionResult<List<CommentResponseDto>>> GetComments()
     {
-        return Ok(commentService.GetComments().Result);
+        return Ok(await commentService.GetAllComments());
     }
-    
+
     [HttpGet("getCommentCache/{articleId}", Name = "GetCommentCache")]
-    public async Task<ActionResult<List<Comment>>> GetCommentCache(string articleId)
+    public async Task<ActionResult<List<CommentResponseDto>>> GetCommentCache(string articleId)
     {
         return Ok(await commentService.GetCommentCacheAsync(articleId));
     }
-    
+
     [HttpGet("getCommentsByArticleId/{articleId}", Name = "GetCommentsByArticleId")]
-    public ActionResult<List<Comment>> GetCommentsByArticleId(string articleId)
+    public async Task<ActionResult<List<CommentResponseDto>>> GetCommentsByArticleId(string articleId)
     {
-        return Ok(commentService.GetCommentsByArticleId(articleId).Result);
+        return Ok(await commentService.GetCommentsByArticleId(articleId));
     }
 }

@@ -1,11 +1,11 @@
-using CoreDomain;
+using CoreDomain.Dtos.CommentDtos;
 
 namespace CommentService.Service;
 
 public interface ICommentService
 {
-    Task CreateComment(Comment comment);
-    Task<List<Comment>> GetComments();
-    Task<List<Comment>> GetCommentCacheAsync(string articleId);
-    Task<List<Comment>> GetCommentsByArticleId(string articleId);
+    Task<CommentResponseDto> CreateComment(CreateCommentDto createCommentDto);
+    Task<List<CommentResponseDto>> GetAllComments();
+    Task<List<CommentResponseDto>> GetCommentCacheAsync(string articleId);
+    Task<List<CommentResponseDto>> GetCommentsByArticleId(string articleId);
 }

@@ -8,7 +8,6 @@ namespace CommentCache.Controllers;
 [Route("[controller]")]
 public class CommentCacheController(ICommentCacheService commentCacheService) : ControllerBase
 {
-    
     [HttpGet("getCommentsByArticleId/{articleId}", Name = "GetCommentsByArticleId")]
     public async Task<List<Comment>> GetCommentsByArticleId(string articleId)
     {

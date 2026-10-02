@@ -1,4 +1,3 @@
-using System.Net;
 using CoreDomain;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,21 +18,17 @@ public class NewsletterServiceController(IHttpClientFactory httpClientFactory) :
                 "ArticleService/getRandomArticle");
 
             if (!response.IsSuccessStatusCode)
-            {
                 return StatusCode(
                     StatusCodes.Status503ServiceUnavailable,
                     "Article service is unavailable.");
-            }
 
             var article =
                 await response.Content.ReadFromJsonAsync<Article>();
 
             if (article is null)
-            {
                 return StatusCode(
                     StatusCodes.Status503ServiceUnavailable,
                     "Article service returned an empty response.");
-            }
 
             return Ok(article);
         }

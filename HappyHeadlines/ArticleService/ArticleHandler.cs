@@ -1,34 +1,48 @@
-using ArticleService.Interface;
-using CoreDomain;
+using ArticleService.Service;
+using CoreDomain.Dtos.ArticleDtos;
 using EasyNetQ;
 
 namespace ArticleService;
 
-public class ArticleHandler(IBus bus, IArticleService articleService) : BackgroundService
+public class ArticleHandler(
+    IBus bus,
+    IServiceScopeFactory scopeFactory) : BackgroundService
 {
     protected override async Task ExecuteAsync(
         CancellationToken stoppingToken)
     {
         Console.WriteLine("MessageHandler starting...");
-
         Console.WriteLine("Connected to RabbitMQ");
 
-        await bus.PubSub.SubscribeAsync<Article>(
-            "article-published",
-             msg =>
+        Console.WriteLine(
+            $"Creating RabbitMQ subscription. PID={Environment.ProcessId}");
+
+        await bus.PubSub.SubscribeAsync<CreateArticleDto>(
+            "article-service",
+             createArticleDto =>
             {
-                Console.WriteLine($"Received article with ID: {msg.Id} and Title: {msg.Title}");
-                articleService.CreateArticle(msg);
+                Console.WriteLine(
+                    $"[{Environment.MachineName}] Received message: " +
+                    $"{createArticleDto.Title} - {createArticleDto.Content}");
+
+                using var scope = scopeFactory.CreateAsyncScope();
+
+                var articleService =
+                    scope.ServiceProvider
+                        .GetRequiredService<IArticleService>();
+
+                articleService.CreateArticle(createArticleDto);
             },
-            stoppingToken);
+            x => x.WithTopic("article-published"),
+            stoppingToken); 
 
         Console.WriteLine("Subscribed to article-published");
 
         try
         {
-            await Task.Delay(
-                Timeout.Infinite,
-                stoppingToken);
+             await Task.Delay(
+                 Timeout.Infinite,
+                 stoppingToken);
         }
         catch (OperationCanceledException)
         {

@@ -8,20 +8,24 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
-        <PackageReference Include="OpenTelemetry.Api" Version="1.19.1" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12"/>
+        <PackageReference Include="OpenTelemetry.Api" Version="1.19.1"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <Content Include="..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DraftDatabase\DraftDatabase.csproj" />
-      <ProjectReference Include="..\Monitoring\Monitoring.csproj" />
+        <ProjectReference Include="..\DraftDatabase\DraftDatabase.csproj"/>
+        <ProjectReference Include="..\Monitoring\Monitoring.csproj"/>
     </ItemGroup>
 
 </Project>

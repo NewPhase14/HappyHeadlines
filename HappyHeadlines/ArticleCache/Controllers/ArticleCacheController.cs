@@ -13,7 +13,7 @@ public class ArticleCacheController(IArticleCacheService articleCacheService) : 
         await articleCacheService.GetLatestArticlesAsync();
         return Ok();
     }
-    
+
     [HttpGet("getArticleAsync/{articleId}", Name = "GetArticleAsync")]
     public async Task<IActionResult> GetArticleAsync(string articleId)
     {

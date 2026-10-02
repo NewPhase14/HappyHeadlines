@@ -1,37 +1,52 @@
 using ArticleQueue.Interfaces;
 using EasyNetQ;
 
-namespace ArticleQueues.Implementation;
+namespace ArticleQueue.Implementation;
 
-public class RabbitMQAdapter : IArticleQueue {
+public class RabbitMQAdapter : IArticleQueue
+{
     private readonly IBus _bus;
-    private readonly Dictionary<string, IDisposable> _subscriptions = new Dictionary<string, IDisposable>();
-    public RabbitMQAdapter(IBus bus){
+    private readonly Dictionary<string, IDisposable> _subscriptions = new();
+
+    public RabbitMQAdapter(IBus bus)
+    {
         _bus = bus;
     }
 
-    public async Task SubscribeAsync<T>(string subscription, Action<T> handler, CancellationToken cancellationToken = default){
-        if(_subscriptions.Keys.Contains(subscription)){
-            throw new ArgumentException("");
-        }
-        var subscriptionHandle = await _bus.PubSub.SubscribeAsync<T>(
-            subscription,
-            handler,
-            cancellationToken
-        );
-        _subscriptions.Add(subscription, subscriptionHandle);
+    public async Task SubscribeAsync<T>(
+        string topic,
+        Action<T> handler,
+        CancellationToken cancellationToken = default)
+    {
+        if (_subscriptions.ContainsKey(topic))
+            throw new ArgumentException(
+                $"Already subscribed to topic '{topic}'.");
+
+        var subscriptionHandle =
+            await _bus.PubSub.SubscribeAsync(
+                Guid.NewGuid().ToString(),
+                handler,
+                x => x.WithTopic(topic),
+                cancellationToken);
+
+        _subscriptions.Add(topic, subscriptionHandle);
     }
 
-    public async Task PublishAsync<T>(string subscription, T message, CancellationToken cancellationToken = default){
-        Console.WriteLine($"Publishing message to {subscription}");
-        await _bus.PubSub.PublishAsync<T>(message, cancellationToken);
+    public async Task PublishAsync<T>(string topic, T message, CancellationToken cancellationToken = default)
+    {
+        Console.WriteLine($"Publishing message to {topic}");
+
+        await _bus.PubSub.PublishAsync(message, topic, cancellationToken);
     }
 
-    public Task UnsubscribeAsync(string subscription, CancellationToken cancellationToken = default){
-        if(_subscriptions.TryGetValue(subscription, out var subscriptionHandle)){
+    public async Task UnsubscribeAsync(string subscription, CancellationToken cancellationToken = default)
+    {
+        if (_subscriptions.TryGetValue(subscription, out var subscriptionHandle))
+        {
             subscriptionHandle.Dispose();
             _subscriptions.Remove(subscription);
         }
-        return Task.CompletedTask;
+
+        await Task.CompletedTask;
     }
 }

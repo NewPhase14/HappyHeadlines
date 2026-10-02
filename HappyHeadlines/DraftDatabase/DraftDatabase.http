@@ -1,6 +1,0 @@
-@DraftDatabase_HostAddress = http://localhost:5182
-
-GET {{DraftDatabase_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -11,26 +11,14 @@ namespace ArticleService.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class ArticleServiceController(
-    IArticleService articleService,
-    TraceContextPropagator traceContextPropagator) : ControllerBase
+    IArticleService articleService) : ControllerBase
 {
     [HttpPost(Name = "CreateArticle")]
     public async Task<ActionResult<ArticleResponseDto>> CreateArticle(
         [FromBody] CreateArticleDto createArticleDto)
     {
-        // Extract context sent from Publisher
-        var parentContext = traceContextPropagator.Extract(
-            default,
-            Request,
-            (request, key) => request.Headers[key].ToArray());
-
-        Baggage.Current = parentContext.Baggage;
-
-        using var activity = MonitoringService.ActivitySource.StartActivity(
-            "ArticleService.CreateArticle",
-            ActivityKind.Consumer,
-            parentContext.ActivityContext);
-
+        MonitoringService.ActivitySource.StartActivity();
+        
         var article = await articleService.CreateArticle(createArticleDto);
 
         return Ok(article);

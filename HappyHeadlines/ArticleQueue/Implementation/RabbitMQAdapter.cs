@@ -1,5 +1,6 @@
 using ArticleQueue.Interfaces;
 using EasyNetQ;
+using Monitoring;
 
 namespace ArticleQueue.Implementation;
 
@@ -34,6 +35,8 @@ public class RabbitMQAdapter : IArticleQueue
 
     public async Task PublishAsync<T>(string topic, T message, CancellationToken cancellationToken = default)
     {
+        MonitoringService.ActivitySource.StartActivity();
+
         Console.WriteLine($"Publishing message to {topic}");
 
         await _bus.PubSub.PublishAsync(message, topic, cancellationToken);

@@ -1,6 +1,7 @@
 using ArticleService.Service;
 using CoreDomain.Dtos.ArticleDtos;
 using EasyNetQ;
+using Monitoring;
 
 namespace ArticleService;
 
@@ -21,6 +22,8 @@ public class ArticleHandler(
             "article-service",
              createArticleDto =>
             {
+                MonitoringService.ActivitySource.StartActivity();
+
                 Console.WriteLine(
                     $"[{Environment.MachineName}] Received message: " +
                     $"{createArticleDto.Title} - {createArticleDto.Content}");

@@ -22,17 +22,6 @@ builder.Services.AddSingleton<IArticlePublisher>(new ArticlePublisher(
     )
 ));
 
-builder.Services.AddSingleton<TraceContextPropagator>();
-builder.Services.AddHttpClient(
-    "DraftService",
-    client =>
-    {
-        client.BaseAddress =
-            new Uri("http://draft-service:8080/");
-
-        client.Timeout = TimeSpan.FromSeconds(2);
-    });
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -17,11 +17,13 @@ public class PublisherServiceController(
     [HttpPost(Name = "PublishArticle")]
     public async Task<IActionResult> PublishArticle([FromBody] CreateArticleDto createArticleDto)
     {
-        MonitoringService.ActivitySource.StartActivity();
+        using var activity = MonitoringService.ActivitySource.StartActivity();
+        
+        MonitoringService.log.Information("Publishing article with title: " + createArticleDto.Title);
 
         await articlePublisher.PublishArticle(createArticleDto);
-
-        MonitoringService.log.Debug("Creating article in database.");
+        
+        MonitoringService.log.Information("Article published");
 
         return Ok();
     }

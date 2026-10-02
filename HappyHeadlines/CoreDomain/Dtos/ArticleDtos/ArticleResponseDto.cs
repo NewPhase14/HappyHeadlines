@@ -15,6 +15,4 @@ public class ArticleResponseDto
     public DateTime CreatedAt { get; set; }
 
     public bool Draft { get; set; }
-
-    public List<CommentResponseDto>? Comments { get; set; }
 }

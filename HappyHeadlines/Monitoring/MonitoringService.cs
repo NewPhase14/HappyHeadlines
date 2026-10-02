@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Reflection;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -9,29 +8,27 @@ namespace Monitoring;
 
 public static class MonitoringService
 {
-    public static readonly string ServiceName = Assembly.GetCallingAssembly().GetName().Name ?? "Unknown";
-    public static TracerProvider TracerProvider;
-    public static ActivitySource ActivitySource = new(ServiceName);
+    public static TracerProvider TracerProvider = null!;
+    public static ActivitySource ActivitySource = null!;
 
-    static MonitoringService()
+    public static void Configure(string serviceName)
     {
-        //OpenTelemetry
+        ActivitySource = new ActivitySource(serviceName);
+
         TracerProvider = Sdk.CreateTracerProviderBuilder()
             .SetResourceBuilder(
                 ResourceBuilder.CreateDefault()
-                    .AddService(ServiceName))
-            .AddSource(ServiceName)
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
+                    .AddService(serviceName))
+            .AddSource(serviceName)
             .SetSampler(new AlwaysOnSampler())
             .AddConsoleExporter()
             .AddZipkinExporter(config =>
             {
-                config.Endpoint = new Uri("http://zipkin:9411/api/v2/spans");
+                config.Endpoint =
+                    new Uri("http://zipkin:9411/api/v2/spans");
             })
             .Build();
 
-        //Serilog
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .WriteTo.Console()

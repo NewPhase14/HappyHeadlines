@@ -1,7 +1,9 @@
 ﻿using ArticleQueue.Configuration;
 using ArticleQueue.Extensions;
+using OpenTelemetry.Context.Propagation;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 builder.Services.AddArticleQueue(options =>
@@ -11,6 +13,7 @@ builder.Services.AddArticleQueue(options =>
     options.MessagingProvider = MessagingProvider.RabbitMQ;
 });
 
+builder.Services.AddSingleton<TraceContextPropagator>();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

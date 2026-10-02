@@ -14,7 +14,7 @@ public class DraftService(IDraftRepository repository) : IDraftService
             Title = createArticleDto.Title,
             Content = createArticleDto.Content,
             Continent = createArticleDto.Continent,
-            Draft = createArticleDto.Draft,
+            Draft = true,
             CreatedAt = DateTime.UtcNow
         };
 

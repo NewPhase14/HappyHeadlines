@@ -17,7 +17,7 @@ public class ArticleServiceController(
     public async Task<ActionResult<ArticleResponseDto>> CreateArticle(
         [FromBody] CreateArticleDto createArticleDto)
     {
-        MonitoringService.ActivitySource.StartActivity();
+        using var activity = MonitoringService.ActivitySource.StartActivity(); 
         
         var article = await articleService.CreateArticle(createArticleDto);
 

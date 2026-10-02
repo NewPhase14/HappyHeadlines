@@ -1,19 +1,17 @@
+using System.Diagnostics;
 using ArticleQueue.Interfaces;
+using CoreDomain;
 using EasyNetQ;
 using Monitoring;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
 
 namespace ArticleQueue.Implementation;
 
-public class RabbitMQAdapter : IArticleQueue
+public class RabbitMQAdapter(IBus bus, TraceContextPropagator traceContextPropagator) : IArticleQueue
 {
-    private readonly IBus _bus;
     private readonly Dictionary<string, IDisposable> _subscriptions = new();
-
-    public RabbitMQAdapter(IBus bus)
-    {
-        _bus = bus;
-    }
-
+    
     public async Task SubscribeAsync<T>(
         string topic,
         Action<T> handler,
@@ -24,7 +22,7 @@ public class RabbitMQAdapter : IArticleQueue
                 $"Already subscribed to topic '{topic}'.");
 
         var subscriptionHandle =
-            await _bus.PubSub.SubscribeAsync(
+            await bus.PubSub.SubscribeAsync(
                 Guid.NewGuid().ToString(),
                 handler,
                 x => x.WithTopic(topic),
@@ -35,13 +33,34 @@ public class RabbitMQAdapter : IArticleQueue
 
     public async Task PublishAsync<T>(string topic, T message, CancellationToken cancellationToken = default)
     {
-        MonitoringService.ActivitySource.StartActivity();
+        using var activity =
+            MonitoringService.ActivitySource.StartActivity(
+                $"publish {topic}",
+                ActivityKind.Producer);
 
-        Console.WriteLine($"Publishing message to {topic}");
+        var tracedMessage = new TracedMessage<T>
+        {
+            Data = message
+        };
 
-        await _bus.PubSub.PublishAsync(message, topic, cancellationToken);
+        var context = new PropagationContext(
+            activity?.Context ?? Activity.Current?.Context ?? default,
+            Baggage.Current);
+
+        traceContextPropagator.Inject(
+            context,
+            tracedMessage.Headers,
+            (headers, key, value) =>
+            {
+                headers[key] = value;
+            });
+
+        await bus.PubSub.PublishAsync(
+            tracedMessage,
+            topic,
+            cancellationToken);
     }
-
+    
     public async Task UnsubscribeAsync(string subscription, CancellationToken cancellationToken = default)
     {
         if (_subscriptions.TryGetValue(subscription, out var subscriptionHandle))

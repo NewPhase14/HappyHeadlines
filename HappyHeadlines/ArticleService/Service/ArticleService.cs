@@ -1,14 +1,12 @@
 using ArticleDatabase.Repository;
 using CoreDomain;
 using CoreDomain.Dtos.ArticleDtos;
-using CoreDomain.Dtos.CommentDtos;
 
 namespace ArticleService.Service;
 
-public class ArticleService(IHttpClientFactory httpClientFactory, IArticleRepository articleRepository)
+public class ArticleService(IArticleRepository articleRepository)
     : IArticleService
 {
-    private readonly HttpClient _commentClient = httpClientFactory.CreateClient("CommentService");
 
     public async Task<ArticleResponseDto> CreateArticle(CreateArticleDto createArticleDto)
     {
@@ -18,7 +16,7 @@ public class ArticleService(IHttpClientFactory httpClientFactory, IArticleReposi
             Title = createArticleDto.Title,
             Content = createArticleDto.Content,
             Continent = createArticleDto.Continent,
-            Draft = createArticleDto.Draft,
+            Draft = false,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -55,14 +53,6 @@ public class ArticleService(IHttpClientFactory httpClientFactory, IArticleReposi
         var article = await articleRepository.GetArticleById(articleId);
         if (article == null) throw new ArgumentException("No article found with the given ID.");
 
-        // Fetch comments for the article from CommentService
-        var response = await _commentClient.GetAsync(
-            $"CommentService/getCommentCache/{articleId}");
-
-        response.EnsureSuccessStatusCode();
-
-        var comments = await response.Content.ReadFromJsonAsync<List<Comment>>();
-
         return new ArticleResponseDto
         {
             Id = article.Id,
@@ -71,14 +61,6 @@ public class ArticleService(IHttpClientFactory httpClientFactory, IArticleReposi
             Continent = article.Continent,
             Draft = article.Draft,
             CreatedAt = article.CreatedAt,
-            Comments = comments?.Select(c => new CommentResponseDto
-            {
-                Id = c.Id,
-                ArticleId = c.ArticleId,
-                Message = c.Message,
-                Author = c.Author,
-                CreatedAt = c.CreatedAt
-            }).ToList()
         };
     }
 

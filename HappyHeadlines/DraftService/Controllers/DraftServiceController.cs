@@ -10,25 +10,14 @@ namespace DraftService.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class DraftServiceController(TraceContextPropagator traceContextPropagator, IDraftService draftService)
+public class DraftServiceController(IDraftService draftService)
     : ControllerBase
 {
     [HttpPost("createDraft", Name = "CreateDraft")]
     public async Task<ActionResult<ArticleResponseDto>> CreateDraft([FromBody] CreateArticleDto createDraftDto)
     {
-        // Extract context sent from ArticleService
-        var parentContext = traceContextPropagator.Extract(
-            default,
-            Request,
-            (request, key) => request.Headers[key].ToArray());
-
-        Baggage.Current = parentContext.Baggage;
-
-        using var activity = MonitoringService.ActivitySource.StartActivity(
-            "DraftService.CreateDraft",
-            ActivityKind.Consumer,
-            parentContext.ActivityContext);
-
+        using var activity = MonitoringService.ActivitySource.StartActivity();
+        
         var draft = await draftService.CreateDraft(createDraftDto);
 
         return Ok(draft);

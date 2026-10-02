@@ -1,6 +1,7 @@
 using ArticleQueue.Configuration;
 using ArticleQueue.Factories;
 using ArticleQueue.Interfaces;
+using OpenTelemetry.Context.Propagation;
 
 namespace ArticleQueue.Extensions;
 
@@ -14,16 +15,25 @@ public static class ServiceCollectionExtension
         var options = new ArticleQueueOptions();
         configureOptions(options);
 
-        IArticleQueue? messagingClient;
         switch (options.MessagingProvider)
         {
             case MessagingProvider.RabbitMQ:
-                messagingClient = RabbitMQFactory.Create(options);
-                services.AddSingleton<IArticleQueue>(sp => messagingClient
-                );
+
+                services.AddSingleton<IArticleQueue>(sp =>
+                {
+                    var traceContextPropagator =
+                        sp.GetRequiredService<TraceContextPropagator>();
+
+                    return RabbitMQFactory.Create(
+                        options,
+                        traceContextPropagator);
+                });
+
                 break;
+
             default:
-                throw new ArgumentException("");
+                throw new ArgumentException(
+                    "Unsupported messaging provider");
         }
 
         return services;

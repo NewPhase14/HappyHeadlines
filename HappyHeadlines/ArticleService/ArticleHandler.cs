@@ -1,45 +1,53 @@
+using System.Diagnostics;
 using ArticleService.Service;
+using CoreDomain;
 using CoreDomain.Dtos.ArticleDtos;
 using EasyNetQ;
 using Monitoring;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
 
 namespace ArticleService;
 
 public class ArticleHandler(
     IBus bus,
-    IServiceScopeFactory scopeFactory) : BackgroundService
+    IServiceScopeFactory scopeFactory, TraceContextPropagator traceContextPropagator) : BackgroundService
 {
     protected override async Task ExecuteAsync(
         CancellationToken stoppingToken)
     {
-        Console.WriteLine("MessageHandler starting...");
-        Console.WriteLine("Connected to RabbitMQ");
-
-        Console.WriteLine(
-            $"Creating RabbitMQ subscription. PID={Environment.ProcessId}");
-
-        await bus.PubSub.SubscribeAsync<CreateArticleDto>(
+        await bus.PubSub.SubscribeAsync<TracedMessage<CreateArticleDto>>(
             "article-service",
-             createArticleDto =>
+            async tracedMessage =>
             {
-                MonitoringService.ActivitySource.StartActivity();
+                var parentContext = traceContextPropagator.Extract(
+                    default,
+                    tracedMessage.Headers,
+                    (headers, key) =>
+                    {
+                        return new List<string>(new[] { headers.ContainsKey(key) ? headers[key].ToString() : string.Empty });
+                    });
 
-                Console.WriteLine(
-                    $"[{Environment.MachineName}] Received message: " +
-                    $"{createArticleDto.Title} - {createArticleDto.Content}");
+                Baggage.Current = parentContext.Baggage;
 
-                using var scope = scopeFactory.CreateAsyncScope();
+                using var activity =
+                    MonitoringService.ActivitySource.StartActivity(
+                        "consume article-published",
+                        ActivityKind.Consumer,
+                        parentContext.ActivityContext);
+
+               await using var scope = scopeFactory.CreateAsyncScope();
 
                 var articleService =
                     scope.ServiceProvider
                         .GetRequiredService<IArticleService>();
 
-                articleService.CreateArticle(createArticleDto);
+                await articleService.CreateArticle(tracedMessage.Data);
             },
             x => x.WithTopic("article-published"),
             stoppingToken); 
 
-        Console.WriteLine("Subscribed to article-published");
+        MonitoringService.log.Information("Subscribed to article-published");
 
         try
         {
@@ -52,6 +60,6 @@ public class ArticleHandler(
             // Application is shutting down
         }
 
-        Console.WriteLine("Message handler is stopping...");
+        MonitoringService.log.Error("Message handler is stopping...");
     }
 }

@@ -1,5 +1,6 @@
 using ArticleQueue.Configuration;
 using ArticleQueue.Factories;
+using Monitoring;
 using OpenTelemetry.Context.Propagation;
 using PublisherService.Infrastructure;
 
@@ -11,16 +12,27 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IArticlePublisher>(new ArticlePublisher(
-    RabbitMQFactory.Create(
+MonitoringService.Configure("PublisherService");
+
+builder.Services.AddSingleton<TraceContextPropagator>();
+
+builder.Services.AddSingleton<IArticlePublisher>(sp =>
+{
+    var traceContextPropagator =
+        sp.GetRequiredService<TraceContextPropagator>();
+
+    var articleQueue = RabbitMQFactory.Create(
         new ArticleQueueOptions
         {
             ConnectionString = Environment.GetEnvironmentVariable(
                 "AppOptions__RABBITMQ_HOST"),
+
             MessagingProvider = MessagingProvider.RabbitMQ
-        }
-    )
-));
+        },
+        traceContextPropagator);
+
+    return new ArticlePublisher(articleQueue);
+});
 
 var app = builder.Build();
 

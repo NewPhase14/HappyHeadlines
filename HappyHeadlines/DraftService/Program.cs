@@ -11,7 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<TraceContextPropagator>();
 
 builder.Services.AddScoped<IDraftRepository, DraftRepository>();
 builder.Services.AddScoped<IDraftService, DraftService.Service.DraftService>();

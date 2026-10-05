@@ -40,7 +40,7 @@ public class ArticleRepository : IArticleRepository
     }
 
     // Get the latest articles from the last 14 days
-    public async Task<List<Article>> GetLatestArticles()
+    public async Task<List<Article>> GetArticlesFromLast14Days()
     {
         var articles = new List<Article>();
 

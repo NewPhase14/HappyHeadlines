@@ -4,9 +4,11 @@ using CoreDomain.Dtos.ArticleDtos;
 
 namespace ArticleService.Service;
 
-public class ArticleService(IArticleRepository articleRepository)
+public class ArticleService(IArticleRepository articleRepository, IHttpClientFactory httpClientFactory)
     : IArticleService
 {
+    
+    private readonly HttpClient cacheClient = httpClientFactory.CreateClient("ArticleCacheService");
 
     public async Task<ArticleResponseDto> CreateArticle(CreateArticleDto createArticleDto)
     {
@@ -33,9 +35,9 @@ public class ArticleService(IArticleRepository articleRepository)
         };
     }
 
-    public async Task<List<ArticleResponseDto>> GetLatestArticles()
+    public async Task<List<ArticleResponseDto>> GetArticlesFromLast14Days()
     {
-        var articles = await articleRepository.GetLatestArticles();
+        var articles = await articleRepository.GetArticlesFromLast14Days();
 
         return articles.Select(a => new ArticleResponseDto
         {
@@ -50,12 +52,27 @@ public class ArticleService(IArticleRepository articleRepository)
 
     public async Task<ArticleResponseDto> GetArticleById(string articleId)
     {
-        var article = await articleRepository.GetArticleById(articleId);
-        if (article == null) throw new ArgumentException("No article found with the given ID.");
-
+        var response = await cacheClient.GetAsync($"ArticleCache/getArticleById/{articleId}");
+        
+        Article? article = null;
+        
+        if (response.IsSuccessStatusCode)
+        {
+            article = await response.Content.ReadFromJsonAsync<Article>();
+        }
+        
+        else
+        {
+            Console.WriteLine("Article not found in cache");
+            
+            article = await articleRepository.GetArticleById(articleId);
+            
+            if (article == null) throw new ArgumentException("No article found with the given ID.");
+        }
+        
         return new ArticleResponseDto
         {
-            Id = article.Id,
+            Id = article!.Id,
             Title = article.Title,
             Content = article.Content,
             Continent = article.Continent,
@@ -129,4 +146,6 @@ public class ArticleService(IArticleRepository articleRepository)
             CreatedAt = randomArticle.CreatedAt
         };
     }
+    
+    
 }

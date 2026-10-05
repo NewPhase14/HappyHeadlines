@@ -11,37 +11,26 @@ public class ArticleCacheService(IConnectionMultiplexer redis, IHttpClientFactor
 
     private readonly IDatabase database = redis.GetDatabase();
 
-    //TODO: Change when this should be called. (Maybe new endpoint in article service, that returns the 10 most recent articles and then it should call articleCacheService from there)
-
-    public async Task<Article> GetArticleAsync(string articleId)
+    // This method retrieves an article from the cache.
+    public async Task<Article?> GetArticleById(string articleId)
     {
         var key = $"article-{articleId}";
 
         var value = await database.StringGetAsync(key);
-
+        
         if (value == RedisValue.Null)
         {
-            var response = await articleClient.GetAsync($"ArticleService/getArticleById/{articleId}");
-
-            response.EnsureSuccessStatusCode();
-
-            var article = response.Content.ReadFromJsonAsync<Article>();
-
-            return article.Result ?? throw new Exception("Failed to retrieve article from ArticleService.");
+            Console.WriteLine("Redis value == null");
+            return null;
         }
 
         return JsonSerializer.Deserialize<Article>(value.ToString())!;
     }
-
-    public async Task<List<Article>> GetArticlesAsync()
+    
+    // This method refreshes the cache by fetching the articles from the latest 14 days.
+    public async Task RefreshCache()
     {
-        //Todo: Implement this method to retrieve all articles from the cache or ArticleService if not present in cache.
-        throw new NotImplementedException();
-    }
-
-    public async Task GetLatestArticlesAsync()
-    {
-        var response = await articleClient.GetAsync("ArticleService/getLatestArticles");
+        var response = await articleClient.GetAsync("ArticleService/getArticlesFromLast14Days");
 
         response.EnsureSuccessStatusCode();
 

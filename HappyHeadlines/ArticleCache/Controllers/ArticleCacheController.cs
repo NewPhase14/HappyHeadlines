@@ -7,17 +7,14 @@ namespace ArticleCache.Controllers;
 [Route("[controller]")]
 public class ArticleCacheController(IArticleCacheService articleCacheService) : ControllerBase
 {
-    [HttpGet(Name = "GetLatestArticles")]
-    public async Task<IActionResult> GetLatestArticles()
+    [HttpGet("getArticleById/{articleId}", Name = "GetArticleById")]
+    public async Task<IActionResult> GetArticleById(string articleId)
     {
-        await articleCacheService.GetLatestArticlesAsync();
-        return Ok();
-    }
-
-    [HttpGet("getArticleAsync/{articleId}", Name = "GetArticleAsync")]
-    public async Task<IActionResult> GetArticleAsync(string articleId)
-    {
-        var article = await articleCacheService.GetArticleAsync(articleId);
+        var article = await articleCacheService.GetArticleById(articleId);
+        if (article == null)
+        {
+            return NotFound();
+        }
         return Ok(article);
     }
 }

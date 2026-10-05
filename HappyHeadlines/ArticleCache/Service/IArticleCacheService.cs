@@ -4,9 +4,7 @@ namespace ArticleCache.Service;
 
 public interface IArticleCacheService
 {
-    Task<Article> GetArticleAsync(string articleId);
+    Task<Article?> GetArticleById(string articleId);
 
-    Task<List<Article>> GetArticlesAsync();
-
-    Task GetLatestArticlesAsync();
+    Task RefreshCache();
 }

@@ -5,7 +5,7 @@ namespace ArticleDatabase.Repository;
 public interface IArticleRepository
 {
     Task<List<Article>> GetAllArticles();
-    Task<List<Article>> GetLatestArticles();
+    Task<List<Article>> GetArticlesFromLast14Days();
     Task<Article?> GetArticleById(string articleId);
     Task<Article> CreateArticle(Article article);
     Task<Article?> UpdateArticle(Article article);

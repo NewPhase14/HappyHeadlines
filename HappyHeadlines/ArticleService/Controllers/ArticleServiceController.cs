@@ -13,7 +13,7 @@ namespace ArticleService.Controllers;
 public class ArticleServiceController(
     IArticleService articleService) : ControllerBase
 {
-    [HttpPost(Name = "CreateArticle")]
+    [HttpPost("createArticle", Name = "CreateArticle")]
     public async Task<ActionResult<ArticleResponseDto>> CreateArticle(
         [FromBody] CreateArticleDto createArticleDto)
     {
@@ -24,7 +24,7 @@ public class ArticleServiceController(
         return Ok(article);
     }
 
-    [HttpGet(Name = "GetAllArticles")]
+    [HttpGet("getAllArticles", Name = "GetAllArticles")]
     public async Task<ActionResult<List<ArticleResponseDto>>> GetAllArticles()
     {
         var articles = await articleService.GetAllArticles();
@@ -32,10 +32,10 @@ public class ArticleServiceController(
         return Ok(articles);
     }
 
-    [HttpGet("getLatestArticles", Name = "GetLatestArticles")]
-    public async Task<ActionResult<List<ArticleResponseDto>>> GetLatestArticles()
+    [HttpGet("getArticlesFromLast14Days", Name = "GetArticlesFromLast14Days")]
+    public async Task<ActionResult<List<ArticleResponseDto>>> GetArticlesFromLast14Days()
     {
-        var articles = await articleService.GetLatestArticles();
+        var articles = await articleService.GetArticlesFromLast14Days();
 
         return Ok(articles);
     }
@@ -48,7 +48,7 @@ public class ArticleServiceController(
         return Ok(article);
     }
 
-    [HttpGet("{articleId}", Name = "GetArticleById")]
+    [HttpGet("getArticleById/{articleId}", Name = "GetArticleById")]
     public async Task<ActionResult<ArticleResponseDto>> GetArticleById(string articleId)
     {
         var article = await articleService.GetArticleById(articleId);
@@ -56,7 +56,7 @@ public class ArticleServiceController(
         return Ok(article);
     }
 
-    [HttpPut(Name = "UpdateArticle")]
+    [HttpPut("updateArticle", Name = "UpdateArticle")]
     public async Task<ActionResult<ArticleResponseDto>> UpdateArticle([FromBody] UpdateArticleDto updateArticleDto)
     {
         var updatedArticle = await articleService.UpdateArticle(updateArticleDto);
@@ -64,7 +64,7 @@ public class ArticleServiceController(
         return Ok(updatedArticle);
     }
 
-    [HttpDelete("{id}", Name = "DeleteArticle")]
+    [HttpDelete("deleteArticle/{id}", Name = "DeleteArticle")]
     public async Task<IActionResult> DeleteArticle(string id)
     {
         await articleService.DeleteArticle(id);

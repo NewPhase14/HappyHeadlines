@@ -1,3 +1,4 @@
+using ArticleCache;
 using ArticleCache.Service;
 using StackExchange.Redis;
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHostedService<ArticleCacheWorker>();
 
 var redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
 
@@ -14,7 +16,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect(redisConnection)
 );
 
-builder.Services.AddSingleton<IArticleCacheService, ArticleCacheService>();
+builder.Services.AddScoped<IArticleCacheService, ArticleCacheService>();
 
 builder.Services.AddHttpClient(
     "ArticleService",

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using CoreDomain;
+using Prometheus;
 using StackExchange.Redis;
 
 namespace ArticleCache.Service;
@@ -10,6 +11,16 @@ public class ArticleCacheService(IConnectionMultiplexer redis, IHttpClientFactor
     private readonly HttpClient articleClient = httpClientFactory.CreateClient("ArticleService");
 
     private readonly IDatabase database = redis.GetDatabase();
+    
+    private static readonly Counter CacheHits =
+        Metrics.CreateCounter(
+            "article_cache_hits_total",
+            "Total number of ArticleCache hits");
+
+    private static readonly Counter CacheMisses =
+        Metrics.CreateCounter(
+            "article_cache_misses_total",
+            "Total number of ArticleCache misses");
 
     // This method retrieves an article from the cache.
     public async Task<Article?> GetArticleById(string articleId)
@@ -20,10 +31,12 @@ public class ArticleCacheService(IConnectionMultiplexer redis, IHttpClientFactor
         
         if (value == RedisValue.Null)
         {
+            CacheMisses.Inc();
             Console.WriteLine("Redis value == null");
             return null;
         }
 
+        CacheHits.Inc();
         return JsonSerializer.Deserialize<Article>(value.ToString())!;
     }
     

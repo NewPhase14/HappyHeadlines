@@ -1,5 +1,6 @@
 using ArticleCache;
 using ArticleCache.Service;
+using Prometheus;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.MapMetrics();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

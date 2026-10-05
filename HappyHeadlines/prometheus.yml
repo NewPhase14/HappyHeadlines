@@ -1,0 +1,13 @@
+﻿global:
+  scrape_interval: 60s
+
+scrape_configs:
+  - job_name: "article-cache"
+    static_configs:
+      - targets:
+          - "article-cache-service:8080"
+
+  - job_name: "comment-cache"
+    static_configs:
+      - targets:
+          - "comment-cache-service:8080"

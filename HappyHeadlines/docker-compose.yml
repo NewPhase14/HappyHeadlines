@@ -326,6 +326,23 @@
       AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
     ports:
       - "8000:80"
+    
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
   
 volumes:
     africa-db-data:
@@ -341,4 +358,5 @@ volumes:
     rps_seq_data:
     draft-db-data:
     redis-data:
+    grafana-data:
     

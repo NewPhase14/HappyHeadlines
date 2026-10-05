@@ -1,4 +1,5 @@
 using CommentCache.Service;
+using Prometheus;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +41,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.MapMetrics();
 
 app.MapControllers();
 

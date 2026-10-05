@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CoreDomain;
+using Prometheus;
 using StackExchange.Redis;
 
 namespace CommentCache.Service;
@@ -14,6 +15,16 @@ public class CommentCacheService(
 
     private readonly HttpClient commentClient =
         httpClientFactory.CreateClient("CommentService");
+    
+    private static readonly Counter CacheHits =
+        Metrics.CreateCounter(
+            "comment_cache_hits_total",
+            "Total number of CommentCache hits");
+
+    private static readonly Counter CacheMisses =
+        Metrics.CreateCounter(
+            "comment_cache_misses_total",
+            "Total number of CommentCache misses");
 
     private readonly IDatabase database = redis.GetDatabase();
 
@@ -32,6 +43,7 @@ public class CommentCacheService(
 
             if (cachedCommentsList != null)
             {
+                CacheHits.Inc();
                 Console.WriteLine("Cache hit");
 
                 // Mark as recently used
@@ -43,6 +55,7 @@ public class CommentCacheService(
 
         // Cache miss
         Console.WriteLine("Cache miss");
+        CacheMisses.Inc();
 
         var response = await commentClient.GetAsync(
             $"CommentService/getCommentsByArticleId/{articleId}");

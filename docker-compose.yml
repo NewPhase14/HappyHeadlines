@@ -292,6 +292,7 @@
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       SUBSCRIBER_DB_CONNECTION: "Host=subscriber-db;Port=5432;Database=subscriber;Username=admin;Password=admin"
+      AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
     depends_on:
       - subscriber-database
     ports:

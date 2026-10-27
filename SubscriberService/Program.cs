@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using SubscriberDatabase;
 using SubscriberDatabase.Repository;
 using SubscriberQueue.Configuration;
 using SubscriberQueue.Factories;
@@ -10,8 +12,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<ISubscriberService, SubscriberService.Service.SubscriberService>();
 builder.Services.AddScoped<ISubscriberRepository, SubscriberRepository>();
+builder.Services.AddScoped<ISubscriberService, SubscriberService.Service.SubscriberService>();
+
+builder.Services.AddDbContext<SubscriberContext>(options => 
+    options.UseNpgsql(builder.Configuration["SUBSCRIBER_DB_CONNECTION"]
+    ));
 
 builder.Services.AddSingleton<ISubscriberQueue>(
     RabbitMQFactory.Create(

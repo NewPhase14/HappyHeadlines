@@ -5,6 +5,8 @@ using SubscriberDatabase.Repository;
 
 var builder = WebApplication.CreateBuilder();
 
+builder.Services.AddControllers();
+
 builder.Services.AddScoped<ISubscriberRepository, SubscriberRepository>();
 
 builder.Services.AddDbContext<SubscriberContext>(options => 
@@ -12,5 +14,11 @@ builder.Services.AddDbContext<SubscriberContext>(options =>
     ));
 
 var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();

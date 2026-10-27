@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Builder;
 using SubscriberQueue.Configuration;
 using SubscriberQueue.Extensions;
 

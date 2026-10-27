@@ -119,6 +119,17 @@
       - "5442:5432"
     volumes:
       - draft-db-data:/var/lib/postgresql
+  
+  subscriber-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: subscriber
+    ports:
+      - "5443:5432"
+    volumes:
+      - subscriber-db-data:/var/lib/postgresql
     
   redis:
     image: redis:latest
@@ -145,7 +156,7 @@
     image: rfidbooking/happyheadlines:article-service-latest
     depends_on:
       - article-database
-      - article-queue-rabbitmq
+      - queue-rabbitmq
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       AFRICA_DB_CONNECTION: "Host=africa-db;Port=5432;Database=africa;Username=admin;Password=admin"
@@ -156,7 +167,7 @@
       ANTARCTICA_DB_CONNECTION: "Host=antarctica-db;Port=5432;Database=antarctica;Username=admin;Password=admin"
       OCEANIA_DB_CONNECTION: "Host=oceania-db;Port=5432;Database=oceania;Username=admin;Password=admin"
       GLOBAL_DB_CONNECTION: "Host=global-db;Port=5432;Database=global;Username=admin;Password=admin"
-      AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
+      AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
     deploy:
       replicas: 3
   
@@ -164,7 +175,7 @@
     image: rfidbooking/happyheadlines:article-service-latest
     depends_on:
       - article-database
-      - article-queue-rabbitmq
+      - queue-rabbitmq
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       AFRICA_DB_CONNECTION: "Host=africa-db;Port=5432;Database=africa;Username=admin;Password=admin"
@@ -175,7 +186,7 @@
       ANTARCTICA_DB_CONNECTION: "Host=antarctica-db;Port=5432;Database=antarctica;Username=admin;Password=admin"
       OCEANIA_DB_CONNECTION: "Host=oceania-db;Port=5432;Database=oceania;Username=admin;Password=admin"
       GLOBAL_DB_CONNECTION: "Host=global-db;Port=5432;Database=global;Username=admin;Password=admin"
-      AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
+      AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
     ports:
       - "5001:8080"
      
@@ -235,17 +246,17 @@
     image: rfidbooking/happyheadlines:publisher-service-latest
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
+      AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
     ports:
       - "5005:8080"
     
   newsletter-service:
     image: rfidbooking/happyheadlines:newsletter-service-latest
     depends_on:
-      - article-queue-rabbitmq
+      - queue-rabbitmq
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
+      AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
     ports:
       - "5006:8080"
     
@@ -268,6 +279,23 @@
       REDIS_CONNECTION: "redis:6379"
     ports:
       - "5008:8080"
+  
+  subscriber-database:
+    build:
+      context: .
+      dockerfile: SubscriberDatabase/Dockerfile
+    depends_on:
+      - subscriber-db
+  
+  subscriber-service:
+    image: rfidbooking/happyheadlines:subscriber-service-latest
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      SUBSCRIBER_DB_CONNECTION: "Host=subscriber-db;Port=5432;Database=subscriber;Username=admin;Password=admin"
+    depends_on:
+      - subscriber-database
+    ports:
+      - "5009:8080"
 
   seq:
     image: datalust/seq
@@ -285,7 +313,7 @@
     ports:
       - "9411:9411"
   
-  article-queue-rabbitmq:
+  queue-rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
@@ -300,12 +328,22 @@
   article-queue:
     image: rfidbooking/happyheadlines:article-queue-latest
     depends_on:
-      - article-queue-rabbitmq
+      - queue-rabbitmq
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      AppOptions__RABBITMQ_HOST: "host=article-queue-rabbitmq"
+      AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
     ports:
       - "8000:80"
+    
+  subscriber-queue:
+    image: rfidbooking/happyheadlines:subscriber-queue-latest
+    depends_on:
+      - queue-rabbitmq
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
+    ports:
+      - "8001:80"
     
   grafana:
     image: grafana/grafana:latest
@@ -335,6 +373,7 @@ volumes:
     global-db-data:
     comment-db-data:
     profanity-db-data:
+    subscriber-db-data:
     rps_seq_data:
     draft-db-data:
     redis-data:

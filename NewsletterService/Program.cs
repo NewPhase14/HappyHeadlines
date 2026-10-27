@@ -15,6 +15,7 @@ MonitoringService.Configure("NewsletterService");
 builder.Services.AddSingleton(
     RabbitHutch.CreateBus(builder.Configuration["AppOptions:RABBITMQ_HOST"]));
 builder.Services.AddHostedService<ArticleHandler>();
+builder.Services.AddHostedService<SubscriberHandler>();
 builder.Services.AddSingleton<TraceContextPropagator>();
 
 builder.Services.AddHttpClient(

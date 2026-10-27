@@ -53,6 +53,15 @@ jobs:
 
           - name: article-queue
             dockerfile: ArticleQueue/Dockerfile
+          
+          - name: subscriber-queue
+            dockerfile: SubscriberQueue/Dockerfile
+          
+          - name: subscriber-service
+            dockerfile: SubscriberService/Dockerfile
+          
+          - name: subscriber-database
+            dockerfile: SubscriberDatabase/Dockerfile
 
     steps:
       - name: Checkout repository

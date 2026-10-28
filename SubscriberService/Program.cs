@@ -1,3 +1,4 @@
+using FeatureHubSDK;
 using Microsoft.EntityFrameworkCore;
 using SubscriberDatabase;
 using SubscriberDatabase.Repository;
@@ -7,6 +8,16 @@ using SubscriberQueue.Interfaces;
 using SubscriberService.Service;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var featureHubConfig = new EdgeFeatureHubConfig(
+    builder.Configuration["FEATUREHUB_URL"],
+    builder.Configuration["FEATUREHUB_API_KEY"]
+);
+builder.Services.AddSingleton<IFeatureHubConfig>(featureHubConfig);
+await featureHubConfig.Init();
+
+var featureHubContext = await featureHubConfig.NewContext().Build();
+builder.Services.AddSingleton(featureHubContext);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -28,6 +39,8 @@ builder.Services.AddSingleton<ISubscriberQueue>(
         }
     )
 );
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

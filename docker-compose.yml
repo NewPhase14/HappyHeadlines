@@ -293,8 +293,11 @@
       ASPNETCORE_ENVIRONMENT: Development
       SUBSCRIBER_DB_CONNECTION: "Host=subscriber-db;Port=5432;Database=subscriber;Username=admin;Password=admin"
       AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
+      FEATUREHUB_URL: "http://featurehub:8085"
+      FEATUREHUB_API_KEY: "4b358a76-b40f-420a-8d92-f3ede8e6ba3c/MXleuBTwPLJru2EfsTsLe9PBrkKONt0MezSaRldf"
     depends_on:
       - subscriber-database
+      - featurehub
     ports:
       - "5009:8080"
 
@@ -363,6 +366,14 @@
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
   
+  featurehub:
+    image: featurehub/party-server:latest
+    restart: always
+    volumes:
+      - featurehub-h2-data:/db
+    ports:
+      - "8085:8085"
+    
 volumes:
     africa-db-data:
     europe-db-data:
@@ -379,4 +390,5 @@ volumes:
     draft-db-data:
     redis-data:
     grafana-data:
+    featurehub-h2-data:
     

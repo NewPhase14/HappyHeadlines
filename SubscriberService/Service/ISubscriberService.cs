@@ -6,4 +6,5 @@ public interface ISubscriberService
 {
     Task<Subscriber> CreateSubscriber(Subscriber subscriber);
     Task DeleteSubscriber(string email);
+    Task<List<Subscriber>> GetAllSubscribers();
 }

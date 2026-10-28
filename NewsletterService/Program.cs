@@ -19,6 +19,16 @@ builder.Services.AddHostedService<SubscriberHandler>();
 builder.Services.AddSingleton<TraceContextPropagator>();
 
 builder.Services.AddHttpClient(
+    "SubscriberService",
+    client =>
+    {
+        client.BaseAddress =
+            new Uri("http://subscriber-service:8080/");
+
+        client.Timeout = TimeSpan.FromSeconds(2);
+    });
+
+builder.Services.AddHttpClient(
     "ArticleService",
     client =>
     {

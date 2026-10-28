@@ -22,4 +22,10 @@ public class SubscriberRepository(SubscriberContext context) : ISubscriberReposi
             await context.SaveChangesAsync();
         }
     }
+
+    public async Task<List<Subscriber>> GetAllSubscribers()
+    {
+        var subscribers = await context.Subscribers.ToListAsync();
+        return subscribers;
+    }
 }

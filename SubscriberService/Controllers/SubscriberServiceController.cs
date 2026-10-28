@@ -21,6 +21,13 @@ public class SubscriberServiceController(ISubscriberService subscriberService) :
         await subscriberService.DeleteSubscriber(email);
         return Ok("Subscriber deleted successfully.");
     }
+    
+    [HttpGet("getAllSubscribers",Name = "GetAllSubscribers")]
+    public async Task<ActionResult<List<Subscriber>>> GetAllSubscribers()
+    {
+        var subscribers = await subscriberService.GetAllSubscribers();
+        return Ok(subscribers);
+    }
 
    
 }

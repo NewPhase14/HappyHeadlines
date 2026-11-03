@@ -154,9 +154,15 @@
   
   article-service:
     image: rfidbooking/happyheadlines:article-service-latest
+    build:
+      context: .
+      dockerfile: ArticleService/Dockerfile
     depends_on:
-      - article-database
-      - queue-rabbitmq
+      article-database:
+        condition: service_started
+      queue-rabbitmq:
+        condition: service_healthy
+        
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       AFRICA_DB_CONNECTION: "Host=africa-db;Port=5432;Database=africa;Username=admin;Password=admin"
@@ -173,9 +179,14 @@
   
   article-service-dev:
     image: rfidbooking/happyheadlines:article-service-latest
+    build:
+      context: .
+      dockerfile: ArticleService/Dockerfile
     depends_on:
-      - article-database
-      - queue-rabbitmq
+      article-database:
+        condition: service_started
+      queue-rabbitmq:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       AFRICA_DB_CONNECTION: "Host=africa-db;Port=5432;Database=africa;Username=admin;Password=admin"
@@ -199,6 +210,9 @@
 
   profanity-service:
     image: rfidbooking/happyheadlines:profanity-service-latest
+    build:
+      context: .
+      dockerfile: ProfanityService/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       PROFANITY_DB_CONNECTION: "Host=profanity-db;Port=5432;Database=profanity;Username=admin;Password=admin"
@@ -216,6 +230,9 @@
     
   comment-service:
     image: rfidbooking/happyheadlines:comment-service-latest
+    build:
+      context: .
+      dockerfile: CommentService/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       COMMENT_DB_CONNECTION: "Host=comment-db;Port=5432;Database=comment;Username=admin;Password=admin"
@@ -234,6 +251,9 @@
   
   draft-service: 
     image: rfidbooking/happyheadlines:draft-service-latest
+    build:
+      context: .
+      dockerfile: DraftService/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       DRAFT_DB_CONNECTION: "Host=draft-db;Port=5432;Database=draft;Username=admin;Password=admin"
@@ -244,6 +264,9 @@
   
   publisher-service:
     image: rfidbooking/happyheadlines:publisher-service-latest
+    build:
+      context: .
+      dockerfile: PublisherService/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
@@ -252,8 +275,12 @@
     
   newsletter-service:
     image: rfidbooking/happyheadlines:newsletter-service-latest
+    build:
+      context: .
+      dockerfile: NewsletterService/Dockerfile
     depends_on:
-      - queue-rabbitmq
+      queue-rabbitmq:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
@@ -262,8 +289,14 @@
     
   comment-cache-service:
     image: rfidbooking/happyheadlines:comment-cache-latest
+    build: 
+      context: .
+      dockerfile: CommentCache/Dockerfile
     depends_on:
-      - redis
+      redis:
+        condition: service_started
+      comment-service:
+        condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       REDIS_CONNECTION: "redis:6379"
@@ -272,8 +305,14 @@
 
   article-cache-service:
     image: rfidbooking/happyheadlines:article-cache-latest
+    build:
+      context: .
+      dockerfile: ArticleCache/Dockerfile
     depends_on:
-      - redis
+      redis:
+        condition: service_started
+      article-service:
+        condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       REDIS_CONNECTION: "redis:6379"
@@ -289,6 +328,9 @@
   
   subscriber-service:
     image: rfidbooking/happyheadlines:subscriber-service-latest
+    build:
+      context: .
+      dockerfile: SubscriberService/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       SUBSCRIBER_DB_CONNECTION: "Host=subscriber-db;Port=5432;Database=subscriber;Username=admin;Password=admin"
@@ -331,8 +373,12 @@
   
   article-queue:
     image: rfidbooking/happyheadlines:article-queue-latest
+    build:
+      context: .
+      dockerfile: ArticleQueue/Dockerfile
     depends_on:
-      - queue-rabbitmq
+      queue-rabbitmq:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"
@@ -341,8 +387,12 @@
     
   subscriber-queue:
     image: rfidbooking/happyheadlines:subscriber-queue-latest
+    build:
+      context: .
+      dockerfile: SubscriberQueue/Dockerfile
     depends_on:
-      - queue-rabbitmq
+      queue-rabbitmq:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       AppOptions__RABBITMQ_HOST: "host=queue-rabbitmq"

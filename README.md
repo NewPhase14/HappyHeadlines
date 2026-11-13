@@ -1,6 +1,6 @@
-## GAF Tactics 
+# GAF Tactics 
 
-1. [Avoid Unncessary Resources] - Stop fetching all articles, make the database return a single article.
+## 1. [Avoid Unncessary Resources] - Stop fetching all articles, make the database return a single article.
 
 This tactic includes the following: 
 - Defer Fetching/Lazy Fetch
@@ -43,7 +43,7 @@ public async Task<Article?> GetLatestArticle()
     }
 ```
 
-2. [Utilize an Efficient Technology] - Add index to the CreatedAt column in the database, so that we can efficiently fetch the latest article.
+## 2. [Utilize an Efficient Technology] - Add index to the CreatedAt column in the database, so that we can efficiently fetch the latest article.
 ### Before GAF implementation
 - Before the implementation, we didn't have an index on the CreatedAt column, so fetching the latest article was inefficient, as the database had to scan all articles to find the latest one.
 ```csharp
@@ -132,7 +132,7 @@ public class ArticleContext(DbContextOptions<ArticleContext> options) : DbContex
 }
 ```
 
-3. [Fetch Data from the Proximity] - Add in-memory caching to the profanity service, so that we don't have to fetch all the profanities from the database every time we want to check for profanity in a message.
+## 3. [Fetch Data from the Proximity] - Add in-memory caching to the profanity service, so that we don't have to fetch all the profanities from the database every time we want to check for profanity in a message.
 
 This tactic includes the following:
 - Cache data closer to the user

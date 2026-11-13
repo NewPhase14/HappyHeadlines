@@ -1,10 +1,8 @@
-using System.Diagnostics;
 using ArticleService.Service;
 using CoreDomain.Dtos.ArticleDtos;
 using Microsoft.AspNetCore.Mvc;
 using Monitoring;
-using OpenTelemetry;
-using OpenTelemetry.Context.Propagation;
+
 
 namespace ArticleService.Controllers;
 
@@ -17,8 +15,8 @@ public class ArticleServiceController(
     public async Task<ActionResult<ArticleResponseDto>> CreateArticle(
         [FromBody] CreateArticleDto createArticleDto)
     {
-        using var activity = MonitoringService.ActivitySource.StartActivity(); 
-        
+        using var activity = MonitoringService.ActivitySource.StartActivity();
+
         var article = await articleService.CreateArticle(createArticleDto);
 
         return Ok(article);
@@ -39,15 +37,7 @@ public class ArticleServiceController(
 
         return Ok(articles);
     }
-
-    [HttpGet("getRandomArticle", Name = "GetRandomArticle")]
-    public async Task<ActionResult<ArticleResponseDto>> GetRandomArticle()
-    {
-        var article = await articleService.GetRandomArticle();
-
-        return Ok(article);
-    }
-
+    
     [HttpGet("getArticleById/{articleId}", Name = "GetArticleById")]
     public async Task<ActionResult<ArticleResponseDto>> GetArticleById(string articleId)
     {
@@ -70,5 +60,13 @@ public class ArticleServiceController(
         await articleService.DeleteArticle(id);
 
         return Ok("Article deleted successfully");
+    }
+
+    [HttpGet("getLastestArticle", Name = "GetLatestArticle")]
+    public async Task<ActionResult<ArticleResponseDto>> GetLatestArticle()
+    {
+        var article = await articleService.GetLatestArticle();
+
+        return Ok(article);
     }
 }

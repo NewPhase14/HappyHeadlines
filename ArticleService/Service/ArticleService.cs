@@ -127,23 +127,20 @@ public class ArticleService(IArticleRepository articleRepository, IHttpClientFac
     {
         await articleRepository.DeleteArticle(articleId);
     }
-
-    public async Task<ArticleResponseDto> GetRandomArticle()
+    
+    public async Task<ArticleResponseDto> GetLatestArticle()
     {
-        var articles = await articleRepository.GetAllArticles();
-        if (articles.Count == 0) throw new InvalidOperationException("No articles found.");
-
-        var random = new Random();
-        var randomArticle = articles[random.Next(articles.Count)];
+        var latestArticle = await articleRepository.GetLatestArticle();
+        if (latestArticle == null) throw new InvalidOperationException("No articles found.");
 
         return new ArticleResponseDto
         {
-            Id = randomArticle.Id,
-            Title = randomArticle.Title,
-            Content = randomArticle.Content,
-            Continent = randomArticle.Continent,
-            Draft = randomArticle.Draft,
-            CreatedAt = randomArticle.CreatedAt
+            Id = latestArticle.Id,
+            Title = latestArticle.Title,
+            Content = latestArticle.Content,
+            Continent = latestArticle.Continent,
+            Draft = latestArticle.Draft,
+            CreatedAt = latestArticle.CreatedAt
         };
     }
     

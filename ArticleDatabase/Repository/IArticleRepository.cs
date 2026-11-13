@@ -10,4 +10,5 @@ public interface IArticleRepository
     Task<Article> CreateArticle(Article article);
     Task<Article?> UpdateArticle(Article article);
     Task DeleteArticle(string articleId);
+    Task<Article?> GetLatestArticle();
 }

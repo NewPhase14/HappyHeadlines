@@ -16,7 +16,7 @@ public class NewsletterServiceController(IHttpClientFactory httpClientFactory) :
         try
         {
             var response = await articleClient.GetAsync(
-                "ArticleService/getRandomArticle");
+                "ArticleService/getLatestArticle");
 
             if (!response.IsSuccessStatusCode)
                 return StatusCode(

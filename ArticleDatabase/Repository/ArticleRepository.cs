@@ -112,4 +112,14 @@ public class ArticleRepository : IArticleRepository
                 await context.SaveChangesAsync();
             }
     }
+    
+    // Get the latest article from global db
+    public async Task<Article?> GetLatestArticle()
+    {
+        await using var context = _coordinator.GetContext("Global");
+
+        var articles = await context.Articles.OrderBy(a => a.CreatedAt).LastOrDefaultAsync();
+
+        return articles ?? null;
+    }
 }

@@ -1,6 +1,7 @@
 using CommentDatabase.Repository;
 using CoreDomain;
 using CoreDomain.Dtos.CommentDtos;
+using Polly.CircuitBreaker;
 
 namespace CommentService.Service;
 
@@ -12,16 +13,28 @@ public class CommentService(IHttpClientFactory httpClientFactory, ICommentReposi
 
     public async Task<CommentResponseDto> CreateComment(CreateCommentDto createCommentDto)
     {
-        var response = await _profanityClient.PostAsJsonAsync(
-            "ProfanityService/checkProfanity",
-            createCommentDto.Message);
+        try
+        {
+            var response = await _profanityClient.PostAsJsonAsync(
+                "ProfanityService/checkProfanity",
+                createCommentDto.Message);
 
-        if (!response.IsSuccessStatusCode) throw new HttpRequestException("Profanity service is unavailable.");
+            response.EnsureSuccessStatusCode();
 
-        var containsProfanity = await response.Content.ReadFromJsonAsync<bool>();
+            var containsProfanity = await response.Content.ReadFromJsonAsync<bool>();
 
-        if (containsProfanity) throw new Exception("Comment contains profanity and cannot be added.");
-
+            if (containsProfanity)
+                throw new Exception("Comment contains profanity and cannot be added.");
+        }
+        catch (BrokenCircuitException)
+        {
+            throw new HttpRequestException("Comment creation is temporarily unavailable because the profanity service is down.");
+        }
+        catch (HttpRequestException)
+        {
+            throw new HttpRequestException("Profanity service is unavailable.");
+        }
+        
         var comment = new Comment
         {
             Id = Guid.NewGuid().ToString(),

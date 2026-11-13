@@ -10,5 +10,5 @@ public interface IArticleService
     Task<List<ArticleResponseDto>> GetAllArticles();
     Task<ArticleResponseDto> UpdateArticle(UpdateArticleDto updateArticleDto);
     Task DeleteArticle(string articleId);
-    Task<ArticleResponseDto> GetRandomArticle();
+    Task<ArticleResponseDto> GetLatestArticle();
 }

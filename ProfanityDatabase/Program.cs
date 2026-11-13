@@ -14,6 +14,8 @@ builder.Services.AddDbContext<ProfanityContext>(options =>
         builder.Configuration["PROFANITY_DB_CONNECTION"]
     ));
 
+builder.Services.AddMemoryCache();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

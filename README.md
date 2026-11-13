@@ -132,5 +132,54 @@ public class ArticleContext(DbContextOptions<ArticleContext> options) : DbContex
 }
 ```
 
-3. [Insert GAF tactic here] - [Insert GAF tactic description here]
+3. [Fetch Data from the Proximity] - Add in-memory caching to the profanity service, so that we don't have to fetch all the profanities from the database every time we want to check for profanity in a message.
 
+This tactic includes the following:
+- Cache data closer to the user
+
+### Before GAF implementation
+- Before the implementation, we fetched all profanities from the database every time we wanted to check for profanity in a message.
+```csharp
+public class ProfanityRepository(ProfanityContext context) : IProfanityRepository
+{
+    public async Task<Profanity> CreateProfanity(Profanity profanity)
+    {
+        context.Profanity.Add(profanity);
+        await context.SaveChangesAsync();
+        return profanity;
+    }
+
+    public async Task<bool> ContainsProfanity(string message)
+    {
+        var words = await context.Profanity.Select(p => p.Word).ToListAsync();
+
+        return words.Any(w => message.Contains(w, StringComparison.OrdinalIgnoreCase));
+    }
+```
+
+### After GAF implementation
+- Now we added in-memory caching to the profanity service, so that we only fetch all profanity words once every hour, and then we cache the words in memory, so that we don't have to fetch them from the database every time we want to check for profanity in a message.
+- We also added a cache invalidation mechanism, so that when we add a new profanity word to the database, we invalidate the cache, so that the next time we check for profanity in a message, we fetch the updated list of profanity words from the database.
+```csharp
+public class ProfanityRepository(ProfanityContext context, IMemoryCache memoryCache) : IProfanityRepository
+{
+    public async Task<Profanity> CreateProfanity(Profanity profanity)
+    {
+        context.Profanity.Add(profanity);
+        await context.SaveChangesAsync();
+        memoryCache.Remove("profanity-words");
+        return profanity;
+    }
+
+    public async Task<bool> ContainsProfanity(string message)
+    {
+        var words = await memoryCache.GetOrCreateAsync("profanity-words", async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+            return await context.Profanity.Select(p => p.Word).ToListAsync();
+        });
+        if (words == null) return false;
+
+        return words.Any(w => message.Contains(w, StringComparison.OrdinalIgnoreCase));
+    }
+```

@@ -43,7 +43,94 @@ public async Task<Article?> GetLatestArticle()
     }
 ```
 
-2. [Insert GAF tactic here] - [Insert GAF tactic description here]
+2. [Utilize an Efficient Technology] - Add index to the CreatedAt column in the database, so that we can efficiently fetch the latest article.
+### Before GAF implementation
+- Before the implementation, we didn't have an index on the CreatedAt column, so fetching the latest article was inefficient, as the database had to scan all articles to find the latest one.
+```csharp
+using CoreDomain;
+using Microsoft.EntityFrameworkCore;
+
+namespace ArticleDatabase;
+
+public class ArticleContext(DbContextOptions<ArticleContext> options) : DbContext(options)
+{
+    public DbSet<Article> Articles { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Article>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+            
+            entity.ToTable("article");
+
+            entity.Property(a => a.Id)
+                .HasColumnName("id");
+
+            entity.Property(a => a.Title)
+                .HasColumnName("title");
+
+            entity.Property(a => a.Content)
+                .HasColumnName("content");
+
+            entity.Property(a => a.Continent)
+                .HasColumnName("continent")
+                .HasMaxLength(50);
+
+            entity.Property(a => a.CreatedAt)
+                .HasColumnName("created_at");
+
+            entity.Property(a => a.Draft)
+                .HasColumnName("draft");
+        });
+    }
+}
+```
+
+### After GAF implementation
+- Now we added an index on the CreatedAt column, so fetching the latest article is efficient, as the database can use the index to find the latest article.
+```csharp
+using CoreDomain;
+using Microsoft.EntityFrameworkCore;
+
+namespace ArticleDatabase;
+
+public class ArticleContext(DbContextOptions<ArticleContext> options) : DbContext(options)
+{
+    public DbSet<Article> Articles { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Article>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+            
+            entity.HasIndex(a => a.CreatedAt);
+
+            entity.ToTable("article");
+
+            entity.Property(a => a.Id)
+                .HasColumnName("id");
+
+            entity.Property(a => a.Title)
+                .HasColumnName("title");
+
+            entity.Property(a => a.Content)
+                .HasColumnName("content");
+
+            entity.Property(a => a.Continent)
+                .HasColumnName("continent")
+                .HasMaxLength(50);
+
+            entity.Property(a => a.CreatedAt)
+                .HasColumnName("created_at");
+
+            entity.Property(a => a.Draft)
+                .HasColumnName("draft");
+        });
+    }
+}
+```
 
 3. [Insert GAF tactic here] - [Insert GAF tactic description here]
 

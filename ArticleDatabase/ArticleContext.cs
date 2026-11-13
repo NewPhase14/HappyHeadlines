@@ -12,6 +12,8 @@ public class ArticleContext(DbContextOptions<ArticleContext> options) : DbContex
         modelBuilder.Entity<Article>(entity =>
         {
             entity.HasKey(a => a.Id);
+            
+            entity.HasIndex(a => a.CreatedAt);
 
             entity.ToTable("article");
 
